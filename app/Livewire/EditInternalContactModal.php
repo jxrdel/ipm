@@ -64,4 +64,12 @@ class EditInternalContactModal extends Component
             dd($e);
         }
     }
+
+    #[On('delete-user')]
+    public function deleteEmployee($id)
+    {
+        InternalContacts::where('ID', $id)->delete();
+        $this->dispatch('refresh-table');
+        $this->dispatch('show-delete-success');
+    }
 }

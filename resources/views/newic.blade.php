@@ -56,7 +56,7 @@
 
                         <div class="col" style="display: flex">
                             <label style="margin-top: 5px" for="title">Phone Ext. &nbsp;</label>
-                            <input class="form-control" name="PhoneExt" type="text" name="" style="width: 300px" required>
+                            <input class="form-control" name="PhoneExt" type="text" name="" style="width: 300px">
                         </div>
                     </div>
 

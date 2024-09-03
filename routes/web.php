@@ -1,10 +1,17 @@
 <?php
 
+use App\Http\Controllers\ContractController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\ExternalCompanyController;
+use App\Http\Controllers\ExternalPersonController;
 use App\Http\Controllers\InternalContactController;
 use App\Http\Controllers\MOHPositionsController;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\UserController;
+use App\Livewire\CreatePurchaseContractModal;
+use App\Livewire\CreatePurchaseModal;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,29 +25,60 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', [Controller::class, 'index'])->name('/');
+Route::get('/Login', [Controller::class, 'login'])->name('login');
+Route::get('/Logout', [Controller::class, 'logout'])->name('logout');
 
-Route::get('/Users', [UserController::class, 'index'])->name('listusers');
-Route::get('/Users/Create', [UserController::class, 'newUser'])->name('newuser');
-Route::put('/createuser', [UserController::class, 'createUser'])->name('createuser');
-Route::get('/Users/Details/{id}', [UserController::class, 'details'])->name('userdetails');
-Route::get('/Users/Edit/{id}', [UserController::class, 'edit'])->name('edituser');
-Route::put('/updateuser', [UserController::class, 'updateUser'])->name('updateuser');
-Route::put('/addrole/{id}', [UserController::class, 'addRole'])->name('addrole');
-Route::get('/deleterole/{id}/{userid}', [UserController::class, 'deleteRole'])->name('deleterole');
-Route::put('/addpgroup/{id}', [UserController::class, 'addPGroup'])->name('addpgroup');
-Route::get('/deletepgroup/{id}/{userid}', [UserController::class, 'deletePGroup'])->name('deletepgroup');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/', [Controller::class, 'index'])->name('/');
+    Route::get('/Users', [UserController::class, 'index'])->name('listusers');
+    Route::get('/Users/Create', [UserController::class, 'newUser'])->name('newuser');
+    Route::put('/createuser', [UserController::class, 'createUser'])->name('createuser');
+    Route::get('/Users/Details/{id}', [UserController::class, 'details'])->name('userdetails');
+    Route::get('/Users/Edit/{id}', [UserController::class, 'edit'])->name('edituser');
+    Route::get('/Users/Delete/{id}', [UserController::class, 'deleteUser'])->name('deleteuser');
+    Route::put('/updateuser', [UserController::class, 'updateUser'])->name('updateuser');
+    Route::put('/addrole/{id}', [UserController::class, 'addRole'])->name('addrole');
+    Route::get('/deleterole/{id}/{userid}', [UserController::class, 'deleteRole'])->name('deleterole');
+    Route::put('/addpgroup/{id}', [UserController::class, 'addPGroup'])->name('addpgroup');
+    Route::get('/deletepgroup/{id}/{userid}', [UserController::class, 'deletePGroup'])->name('deletepgroup');
 
 
-Route::get('/Departments', [DepartmentController::class, 'index'])->name('listdepartments');
-Route::get('/Departments/Create', [DepartmentController::class, 'newDepartment'])->name('newdept');
-Route::put('/createdept', [DepartmentController::class, 'createdept'])->name('createdept');
-Route::get('/Departments/Details/{id}', [DepartmentController::class, 'details'])->name('departmentdetails');
-Route::get('/Departments/Edit/{id}', [DepartmentController::class, 'edit'])->name('editdepartment');
-Route::put('/updatedept', [DepartmentController::class, 'update'])->name('updatedept');
+    Route::get('/Departments', [DepartmentController::class, 'index'])->name('listdepartments');
+    Route::get('/Departments/Create', [DepartmentController::class, 'newDepartment'])->name('newdept');
+    Route::put('/createdept', [DepartmentController::class, 'createdept'])->name('createdept');
+    Route::get('/Departments/Details/{id}', [DepartmentController::class, 'details'])->name('departmentdetails');
+    Route::get('/Departments/Edit/{id}', [DepartmentController::class, 'edit'])->name('editdepartment');
+    Route::put('/updatedept', [DepartmentController::class, 'update'])->name('updatedept');
 
-Route::get('/MOHRoles', [MOHPositionsController::class, 'index'])->name('listmohroles');
+    Route::get('/MOHRoles', [MOHPositionsController::class, 'index'])->name('listmohroles');
+    Route::get('/getroles', [MOHPositionsController::class, 'getRoles'])->name('getroles');
 
-Route::get('/InternalContacts', [InternalContactController::class, 'index'])->name('listinternalcontacts');
-Route::get('/InternalContacts/Create', [InternalContactController::class, 'newinternalcontact'])->name('newinternalcontact');
-Route::put('/createic}', [InternalContactController::class, 'createInternalContact'])->name('createic');
+    Route::get('/InternalContacts', [InternalContactController::class, 'index'])->name('listinternalcontacts');
+    Route::get('/getinternalcontacts', [InternalContactController::class, 'getInternalContacts'])->name('getinternalcontacts');
+    Route::get('/InternalContacts/Create', [InternalContactController::class, 'newinternalcontact'])->name('newinternalcontact');
+    Route::post('/setinternalcontacts', [CreatePurchaseContractModal::class, 'setIC'])->name('setinternalcontacts');
+    Route::put('/createic}', [InternalContactController::class, 'createInternalContact'])->name('createic');
+
+    Route::get('/ExternalCompanies', [ExternalCompanyController::class, 'index'])->name('externalcompanies');
+    Route::get('/getexternalcompanies', [ExternalCompanyController::class, 'getExternalCompanies'])->name('getexternalcompanies');
+
+    Route::get('/ExternalPersons', [ExternalPersonController::class, 'index'])->name('externalpersons');
+    Route::get('/getexternalpersons', [ExternalPersonController::class, 'getExternalPersons'])->name('getexternalpersons');
+
+    Route::get('/Purchases', [PurchaseController::class, 'index'])->name('purchases');
+    Route::get('/getpurchases', [PurchaseController::class, 'getPurchases'])->name('getpurchases');
+
+    Route::get('/PurchaseContracts', [ContractController::class, 'purchaseContracts'])->name('purchasecontracts');
+    Route::get('/getpurchasecontracts', [ContractController::class, 'getPurchaseContracts'])->name('getpurchasecontracts');
+    Route::get('/getactivepurchasecontracts', [ContractController::class, 'getActivePurchaseContracts'])->name('getactivepurchasecontracts');
+    Route::get('/getinactivepurchasecontracts', [ContractController::class, 'getInactivePurchaseContracts'])->name('getinactivepurchasecontracts');
+
+    Route::get('/EmployeeContracts', [ContractController::class, 'employeeContracts'])->name('employeecontracts');
+    Route::get('/getemployeecontracts', [ContractController::class, 'getEmployeeContracts'])->name('getemployeecontracts');
+    Route::get('/getactiveemployeecontracts', [ContractController::class, 'getActiveEmployeeContracts'])->name('getactiveemployeecontracts');
+    Route::get('/getinactiveemployeecontracts', [ContractController::class, 'getInactiveEmployeeContracts'])->name('getinactiveemployeecontracts');
+
+    Route::get('/Notifications', [NotificationsController::class, 'index'])->name('notifications');
+    Route::get('/getnotifications', [NotificationsController::class, 'getNotifications'])->name('getnotifications');
+
+});

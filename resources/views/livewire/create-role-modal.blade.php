@@ -9,7 +9,7 @@
         <form wire:submit.prevent="insertRole" action="">
             <div class="modal-body">
                 <div class="input-group mb-3">
-                    <input type="text" wire:model="mohrole" class="form-control" placeholder="Enter Role Name" aria-label="Role Name" required>
+                    <input type="text" wire:model="mohrole" class="form-control" placeholder="Enter Role Name" aria-label="Role Name" autocomplete="off" required>
                 </div>
             </div>
             <div class="modal-footer" style="align-items: center">

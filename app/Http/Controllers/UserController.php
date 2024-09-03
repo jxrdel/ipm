@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ContractReminder;
 use App\Models\BusinessGroups;
 use App\Models\InternalContacts;
 use App\Models\MenuHeaders;
 use App\Models\MOHRoles;
+use App\Models\Notifications;
 use App\Models\PermissionGroups;
 use App\Models\PGroup;
+use App\Models\PurchaseContracts;
 use App\Models\Roles;
 use App\Models\UserPermissions;
 use App\Models\UserRoles;
@@ -15,7 +18,9 @@ use App\Models\Users;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
@@ -29,6 +34,7 @@ class UserController extends Controller
     {
         $internalcontacts = InternalContacts::orderBy('FirstName', 'asc')->get();
         $roles = Roles::all();
+
         return view('newuser', compact('internalcontacts', 'roles'));
     }
 
@@ -39,12 +45,15 @@ class UserController extends Controller
         $now = Carbon::now();
         $now = $now->format('Y-m-d H:i:s');
 
+        $username = 'MOH\ ' . $request->input('username');
+        $username = str_replace(' ', '', $username);
+        // dd($username);
         $selectedRoles = $request->session()->get('selectedRoles', []);
         $selectedPGroups = $request->session()->get('selectedPGroups', []);
         $selectedPermissions = $request->session()->get('selectedPermissions', []);
 
         $newuser = Users::create([
-            'Name' => $request->input('username'),
+            'Name' => $username,
             'IsActive' => $IsActive,
             'UsrRolePermTimestamp' => $now,
             'IsSysAdmin' => 0,
@@ -73,7 +82,9 @@ class UserController extends Controller
             ]);
         }
 
-        session()->flush();
+        session(['selectedRoles' => []]);
+        session(['selectedPGroups' => []]);
+        session(['selectedPermissions' => []]);
         return redirect()->route('listusers')->with('success', 'User created successfully.');
     }
 
@@ -163,6 +174,12 @@ class UserController extends Controller
         ]);
 
         return redirect()->route('listusers')->with('success', 'User details saved successfully.');
+    }
+
+    public function deleteUser($id){
+        
+        Users::where('ID', $id)->delete();
+        return redirect()->route('listusers')->with('success', 'User deleted successfully.');
     }
 
     public function addRole(Request $request, $id)

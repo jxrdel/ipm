@@ -1,8 +1,18 @@
-<div>
-    @foreach ($mohroles as $role)
-    <tr>
-        <td>{{$role->Name}}</td>
-        <td style="text-align: center"><button data-bs-toggle="modal" data-bs-target="#exampleModal"  type="button" class="btn btn-outline-danger"><i class="bi bi-trash"></i></button></td>
-    </tr>
-    @endforeach
+<div wire:ignore>
+    <table id="rolestable" class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Role</th>
+                <th style="text-align: center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($mohroles as $role)
+            <tr>
+                <td>{{ $role->Name }}</td>
+                <td><a href="#" onclick="showEdit('{{$role->ID}}')">Edit</a></td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
 </div>

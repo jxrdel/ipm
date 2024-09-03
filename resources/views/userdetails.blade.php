@@ -10,6 +10,7 @@
 @section('content')
     
 
+        @livewire('view-internal-contact-modal')
         <!-- Page Heading -->
         <div class="row">
             <div class="col">
@@ -39,7 +40,7 @@
                     <div class="col" >System Admin: <i class="{{ $user->IsSysAdmin == 1 ? 'bi bi-check-lg' : 'bi bi-x-lg' }}"></i></div>
                 </div>
                 <div class="row" style="padding-top: 10px">
-                    <div class="col">Contact: {{$internalcontact->FirstName}} {{$internalcontact->LastName}}</div>
+                    <div class="col">Contact: <a href="#" onclick="displayIC({{$internalcontact->ID}})" >{{$internalcontact->FirstName}} {{$internalcontact->LastName}}</a></div>
                 </div>
             </div>
         </div>
@@ -249,5 +250,17 @@
         // Set the fontWeight property to 'bold'
         activeheader.style.fontWeight = 'bold';
         });
+    </script>
+
+    
+    <script>
+        function displayIC(contactID) {
+            // Do something with the user ID
+            Livewire.dispatch('show-viewic-modal', { id: contactID })
+        }
+
+        window.addEventListener('display-viewic-modal', event => {
+            $('#viewICModal').modal('show');
+        })
     </script>
 @endsection

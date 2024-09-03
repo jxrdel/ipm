@@ -38,9 +38,9 @@
             <div class="card-body">
                 <div class="row">
 
-                    <div class="col"> 
-                        <label for="">Name: </label>
-                        <input type="text" name="Name" value="" style="width: 350px">
+                    <div class="col" style="display: flex"> 
+                        <label style="margin-top: 5px" for="">Name: &nbsp;</label>
+                        <input class="form-control" type="text" name="Name" value="" style="width: 350px">
                     </div>
 
                     <div class="col"> 
@@ -54,17 +54,17 @@
                         </select>
                     </div>
 
-                    <div class="col">
-                        <label for="">Abbreviation: </label>
-                        <input type="text" name="Abbreviation" value="" style="width: 200px">
+                    <div class="col" style="display: flex">
+                        <label style="margin-top: 5px" for="">Abbreviation: &nbsp;</label>
+                        <input class="form-control" type="text" name="Abbreviation" value="" style="width: 200px">
                     </div>
                 </div>
 
                 <div class="row" style="padding-top: 20px">
 
-                    <div class="col-4">
-                        <label for="">Details: </label>
-                        <input type="text" name="Details" value="" style="width: 200px">
+                    <div class="col-4" style="display: flex">
+                        <label style="margin-top: 5px" for="">Details: &nbsp;</label>
+                        <input class="form-control" type="text" name="Details" value="" style="width: 200px">
                     </div>
                     
                     <div class="col"> 

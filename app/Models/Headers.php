@@ -18,4 +18,9 @@ class Headers extends Model
         'ID',
         'Label',
     ];
+    
+    public function roles()
+    {
+        return $this->belongsToMany(Roles::class, 'RoleNavMenuHeaders', 'HeaderId', 'RoleId');
+    }
 }

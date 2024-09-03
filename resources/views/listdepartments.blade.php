@@ -19,12 +19,28 @@
         <div class="card">
             <div class="card-body">
                 <div class="row" style="margin-left: 5px">
-                    <a href="{{route('newdept')}}" class="btn btn-primary btn-icon-split" style="width: 12rem">
-                        <span class="icon text-white-50">
-                            <i class="fas fa-plus" style="color: white"></i>
-                        </span>
-                        <span class="text"  style="width: 200px">Add Department</span>
-                    </a> 
+                       
+                @auth
+                    @if (auth()->user()->hasPermission('BusinessGroup : Create : Screen'))
+
+                        <a href="{{route('newdept')}}" class="btn btn-primary btn-icon-split" style="width: 12rem">
+                            <span class="icon text-white-50">
+                                <i class="fas fa-plus" style="color: white"></i>
+                            </span>
+                            <span class="text"  style="width: 200px">Add Department</span>
+                        </a> 
+
+                    @else
+
+                        <button disabled class="btn btn-primary btn-icon-split" style="width: 12rem;pointer-events: auto;cursor: not-allowed;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Access denied">
+                            <span class="icon text-white-50">
+                                <i class="fas fa-plus" style="color: white"></i>
+                            </span>
+                            <span class="text"  style="width: 200px">Add Department</span>
+                        </button> 
+
+                    @endif
+                @endauth
                 </div>
                 <div class="row" style="margin-top: 30px">
                     <table id="dataTable" class="table table-striped table-bordered">
@@ -42,7 +58,17 @@
                                 <td>{{ $department->Name }}</td>
                                 <td style="text-align: center">{{ $department->Abbreviation }}</td>
                                 <td  style="text-align: center">{{ $department->BGTypeName }}</td>
-                                <td><a href="{{ route('departmentdetails', ['id' => $department->ID]) }}">View</a> | <a href="{{ route('editdepartment', ['id' => $department->ID]) }}">Edit</a> | <a href="#">Delete</a></td>
+                                <td>
+                                    <a href="{{ route('departmentdetails', ['id' => $department->ID]) }}">View</a> 
+
+                                    @if (auth()->user()->hasPermission('BusinessGroup : Edit : Screen'))
+                                    | <a href="{{ route('editdepartment', ['id' => $department->ID]) }}">Edit</a> 
+                                    @endif 
+                                    @if (auth()->user()->hasPermission('BusinessGroup : Delete : Screen'))
+                                    | <a href="#">Delete</a>
+                                    @endif
+                                    
+                                </td>
                             </tr>
                             @endforeach
                         </tbody>

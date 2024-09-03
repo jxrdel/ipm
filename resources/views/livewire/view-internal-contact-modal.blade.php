@@ -29,16 +29,13 @@
 
                 <div class="row">
                     <div class="col">
-                        <label> Active: {{ $this->isactive }}</label>
+                        <label> Active: <i class="{{ $this->isactive == 1 ? 'bi bi-check-lg' : 'bi bi-x-lg' }}"></i></label>
                     </div>
                     <div class="col">
                         <label>Ext: {{$this->extno}} </label>
                     </div>
                 </div>
 
-                <div class="row" style="margin-top: 30px">
-                    <a class="btn btn-primary" href="#" style="width: 10rem; margin:auto;"><i class="fas fa-plus"></i> Add Contract</a>
-                </div>
 
                 <div class="accordion" id="accordionExample" style="margin-top: 15px">
                     <div class="accordion-item">

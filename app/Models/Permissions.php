@@ -22,4 +22,9 @@ class Permissions extends Model
         'BusinessGroupId',
         'Description',
     ];
+    
+    public function permissiongroups()
+    {
+        return $this->belongsToMany(PGroup::class, 'PermissionInGroups', 'PermissionId', 'PermissionGroupId');
+    }
 }

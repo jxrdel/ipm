@@ -10,7 +10,7 @@
           <div class="modal-body">
               <div class="input-group mb-3">
                   <input id="mohroleid" type="text" wire:model="mohroleid" class="form-control" placeholder="Enter Role Name" aria-label="Role Name" required style="display: none">
-                  <input id="mohroletext" type="text" wire:model="mohrole" class="form-control" placeholder="Enter Role Name" aria-label="Role Name" required>
+                  <input id="mohroletext" type="text" wire:model="mohrole" class="form-control" placeholder="Enter Role Name" aria-label="Role Name" autocomplete="off" required>
               </div>
           </div>
           <div class="modal-footer" style="align-items: center">

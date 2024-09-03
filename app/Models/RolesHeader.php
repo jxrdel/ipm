@@ -23,11 +23,11 @@ class RolesHeader extends Model
 
     public function role()
     {
-        return $this->belongsTo(Roles::class, 'RoleId', 'RoleId');
+        return $this->belongsTo(Roles::class, 'RoleId', 'ID');
     }
 
     public function header()
     {
-        return $this->belongsTo(Headers::class, 'HeaderId', 'RoleId');
+        return $this->belongsTo(Headers::class, 'HeaderId', 'ID');
     }
 }

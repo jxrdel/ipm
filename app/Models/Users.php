@@ -35,9 +35,28 @@ class Users extends Authenticatable
     {
         return $this->belongsToMany(ModelsRoles::class, 'RoleAlloweds', 'UserId', 'RoleId');
     }
+    
+    public function hasRole($role)
+    {
+        return $this->roles()->where('Name', $role)->exists();
+    }
 
     public function permissiongroups()
     {
         return $this->belongsToMany(PGroup::class, 'PermissionGroupAlloweds', 'UserId', 'PermissionGroupId');
+    }
+    
+    public function hasPermission($permissionName)
+    {
+        return $this->roles->flatMap->permissiongroups->flatMap->permissions->pluck('Description')->contains($permissionName);
+    }
+
+    public function internalcontact(){
+        return $this->belongsTo(InternalContacts::class, 'InternalContactId', 'ID');
+    }
+    
+    public function hasHeader($header)
+    {
+        return $this->roles->flatMap->headers->pluck('Label')->contains($header);
     }
 }

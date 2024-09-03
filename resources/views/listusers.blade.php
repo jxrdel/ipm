@@ -18,13 +18,32 @@
 
         <div class="card">
             <div class="card-body">
+
                 <div class="row" style="margin-left: 5px">
-                    <a href="{{route('newuser')}}" class="btn btn-primary btn-icon-split" style="width: 10rem">
-                        <span class="icon text-white-50">
-                            <i class="fas fa-user-plus" style="color: white"></i>
-                        </span>
-                        <span class="text"  style="width: 200px">Create User</span>
-                    </a> 
+
+                    
+                @auth
+                    @if (auth()->user()->hasPermission('User : Create : Screen'))
+
+                        <a href="{{route('newuser')}}" class="btn btn-primary btn-icon-split" style="width: 10rem">
+                            <span class="icon text-white-50">
+                                <i class="fas fa-user-plus" style="color: white"></i>
+                            </span>
+                            <span class="text"  style="width: 200px">Create User</span>
+                        </a> 
+
+                    @else
+
+                        <button disabled class="btn btn-primary btn-icon-split" style="width: 10rem;pointer-events: auto;cursor: not-allowed;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Access denied">
+                            <span class="icon text-white-50">
+                                <i class="fas fa-user-plus" style="color: white"></i>
+                            </span>
+                            <span class="text"  style="width: 200px">Create User</span>
+                        </button> 
+
+                    @endif
+                @endauth
+
                 </div>
                 <div class="row" style="margin-top: 30px">
                     <table id="dataTable" class="table table-striped table-bordered">
@@ -32,7 +51,7 @@
                             <tr>
                                 <th>User Name</th>
                                 <th style="text-align: center">Active</th>
-                                <th style="text-align: center">Actions</th>
+                                <th style="text-align: center; width: 300px">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -40,7 +59,17 @@
                             <tr>
                                 <td>{{ $user->Name }}</td>
                                 <td style="text-align: center"><i class="{{ $user->IsActive == 1 ? 'bi bi-check-lg' : 'bi bi-x-lg' }}"></i> </td>
-                                <td><a href="{{ route('userdetails', ['id' => $user->ID]) }}">View</a> | <a href="{{ route('edituser', ['id' => $user->ID]) }}">Edit</a> | <a href="#">Delete</a></td>
+                                <td style="text-align: center">
+                                    <a href="{{ route('userdetails', ['id' => $user->ID]) }}">View</a> 
+                                    
+                                    @if (auth()->user()->hasPermission('User : Edit : Screen'))
+                                        | <a href="{{ route('edituser', ['id' => $user->ID]) }}">Edit</a>
+                                    @endif
+                                    
+                                    @if (auth()->user()->hasPermission('User : Delete : Screen'))
+                                        | <a href="#" onclick="deleteUser('{{ route('deleteuser', ['id' => $user->ID]) }}')">Delete</a>
+                                    @endif
+                                </td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -86,6 +115,18 @@
         activelink.style.fontWeight = 'bold';
         activelink.style.textDecoration = 'underline';
         });
+
+        
+    function deleteUser(redirectRoute) {
+        // Display a confirmation dialog
+        var deleteConfirmation = confirm('Are you sure you want to delete this user?');
+
+        // Check the user's choice
+        if (deleteConfirmation) {
+            // User clicked OK
+            window.location.href = redirectRoute;
+        }
+    }
     </script>
     
 @endsection

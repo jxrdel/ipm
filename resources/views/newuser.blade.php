@@ -41,9 +41,9 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-4">
-                                <label for="username">User Name&nbsp;</label>
-                                <input name="username" type="text" name="" style="width: 70%" required>
+                            <div class="col-4" style="display: flex">
+                                <label style="margin-top: 5px" for="username">User Name: &nbsp;</label>
+                                <input class="form-control" name="username" type="text" name="" style="width: 60%" required autocomplete="off">
                             </div>
 
                             <div class="col-2">
@@ -53,8 +53,8 @@
                             </div>
                             
                             <div class="col">
-                                <div style="margin-top: -6px">
-                                    <label for="title">Internal Contact &nbsp;</label>
+                                <div style="margin-top: -6px;display:flex">
+                                    <label style="margin-top: 5px" for="title">Internal Contact &nbsp;</label>
                                     <select name="InternalContactId" class="form-select" style="display: inline;width: 300px">
                                         <option value=""></option>
                                                 
@@ -63,6 +63,8 @@
                                         @endforeach
                         
                                     </select>
+                                    &nbsp;&nbsp;&nbsp;
+                                    <p>No Internal Contact? <a href="{{ route('newinternalcontact') }}">Click Here</a></p>
                                 </div>
                             </div>
                         </div>

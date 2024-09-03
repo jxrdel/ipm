@@ -33,7 +33,7 @@ class EditRoleModal extends Component
             'Name' => $this->mohrole,
         ]);
         $this->dispatch('close-edit-modal');
-        $this->dispatch('refresh_table');
+        $this->dispatch('refresh-table');
         $this->dispatch('show-edit-success');
     }
 }

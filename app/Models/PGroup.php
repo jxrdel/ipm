@@ -24,4 +24,14 @@ class PGroup extends Model
     {
         return $this->belongsToMany(Users::class, 'PermissionGroupAlloweds', 'PermissionGroupId', 'UserId');
     }
+
+    public function permissions()
+    {
+        return $this->belongsToMany(Permissions::class, 'PermissionInGroups', 'PermissionGroupId', 'PermissionId');
+    }
+
+    public function hasPermission($permission)
+    {
+        return $this->permissions()->where('Description', $permission)->exists();
+    }
 }
