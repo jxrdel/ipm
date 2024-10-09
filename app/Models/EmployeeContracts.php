@@ -29,4 +29,24 @@ class EmployeeContracts extends Model
         'BusinessGroupId',
         'ManagerContactId',
     ];
+
+    public function internalcontacts()
+    {
+        return $this->belongsToMany(InternalContacts::class, 'InternalContactEmployeeContracts', 'EmployeeContractId', 'InternalContactId');
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notifications::class, 'ItemId', 'ID')
+            ->where('TypeId', 2); // Ensure TypeId is 1 for PurchaseContracts
+    }
+
+    public function uploads()
+    {
+        return $this->hasMany(EmployeeContractUploads::class, 'EmployeeContractID', 'ID');
+    }
+
+    public function departments(){
+        return $this->belongsToMany(Departments::class, 'EmployeeContractBusinessGroups', 'EmployeeContractId', 'BusinessGroupId');
+    }
 }

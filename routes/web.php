@@ -10,8 +10,12 @@ use App\Http\Controllers\MOHPositionsController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\UserController;
+use App\Livewire\CreateEmployeeContract;
+use App\Livewire\CreatePurchaseContract;
 use App\Livewire\CreatePurchaseContractModal;
 use App\Livewire\CreatePurchaseModal;
+use App\Livewire\EditEmployeeContract;
+use App\Livewire\EditPurchaseContract;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -69,11 +73,15 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/getpurchases', [PurchaseController::class, 'getPurchases'])->name('getpurchases');
 
     Route::get('/PurchaseContracts', [ContractController::class, 'purchaseContracts'])->name('purchasecontracts');
+    Route::get('/PurchaseContracts/Create', CreatePurchaseContract::class)->name('purchasecontracts.create');
+    Route::get('/PurchaseContracts/Edit/{id}', EditPurchaseContract::class)->name('purchasecontracts.edit');
     Route::get('/getpurchasecontracts', [ContractController::class, 'getPurchaseContracts'])->name('getpurchasecontracts');
     Route::get('/getactivepurchasecontracts', [ContractController::class, 'getActivePurchaseContracts'])->name('getactivepurchasecontracts');
     Route::get('/getinactivepurchasecontracts', [ContractController::class, 'getInactivePurchaseContracts'])->name('getinactivepurchasecontracts');
 
     Route::get('/EmployeeContracts', [ContractController::class, 'employeeContracts'])->name('employeecontracts');
+    Route::get('/EmployeeContracts/Create', CreateEmployeeContract::class)->name('employeecontracts.create');
+    Route::get('/EmployeeContracts/Edit/{id}', EditEmployeeContract::class)->name('employeecontracts.edit');
     Route::get('/getemployeecontracts', [ContractController::class, 'getEmployeeContracts'])->name('getemployeecontracts');
     Route::get('/getactiveemployeecontracts', [ContractController::class, 'getActiveEmployeeContracts'])->name('getactiveemployeecontracts');
     Route::get('/getinactiveemployeecontracts', [ContractController::class, 'getInactiveEmployeeContracts'])->name('getinactiveemployeecontracts');

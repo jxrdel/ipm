@@ -26,10 +26,10 @@
         <div class="card">
             <div class="card-body">
                 <div class="row" style="margin-left: 5px">
-                    <div class="col-10">
+                    <div class="col">
                         @auth
                             @if (auth()->user()->hasPermission('PurchaseContract : Create : Screen'))
-                                <a type="button" data-bs-toggle="modal" data-bs-target="#createPCModal" class="btn btn-primary btn-icon-split" style="width: 12rem">
+                                <a href="{{route('purchasecontracts.create')}}" class="btn btn-primary btn-icon-split" style="width: 12rem">
                                     <span class="icon text-white-50">
                                         <i class="fas fa-plus" style="color: white"></i>
                                     </span>
@@ -46,10 +46,20 @@
                         @endauth 
                     </div>
 
-                    <div class="col" style="justify-content: end">
-                        <button type="button" class="btn btn-primary" id="all-btn">All</button>
-                        <button type="button" class="btn btn-success" id="active-btn">Active</button>
-                        <button type="button" class="btn btn-warning" id="inactive-btn" style="color: black">Inactive</button>
+                    <div class="col" style="text-align:right">
+                        <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+    
+                            <input type="radio" class="btn-check" name="btnradio" id="btn-active" autocomplete="off" checked>
+                            <label class="btn btn-outline-primary" for="btn-active">Active</label>
+                          
+                            <input type="radio" class="btn-check" name="btnradio" id="btn-all" autocomplete="off">
+                            <label class="btn btn-outline-primary" for="btn-all">All</label>
+                          
+                            <input type="radio" class="btn-check" name="btnradio" id="btn-inactive" autocomplete="off">
+                            <label class="btn btn-outline-primary" for="btn-inactive">Inactive</label>
+                          
+                        </div>
+
                     </div>
                 </div>
                 <div class="row" style="margin-top: 30px">
@@ -132,13 +142,14 @@
                             orderable: false,
                             searchable: false,
                             render: function (data, type, row) {
-                                return '<a href="#" onclick="showView(' + data.ID + ')">View</a> | <a href="#" onclick="showEdit(' + data.ID + ')">Edit</a> | <a href="#" onclick="showDelete(' + data.ID + ')">Delete</a>';
+                                return '<a href="#" onclick="showView(' + data.ID + ')">View</a> | <a href="PurchaseContracts/Edit/' + data.ID + '" >Edit</a> | <a href="#" onclick="showDelete(' + data.ID + ')">Delete</a>';
                             }
                         },
                 ]
             });
         });
 
+                
 
         $('#active-btn').on('click', function() {
             $('#contracttable').DataTable().ajax.url('{{ route("getactivepurchasecontracts") }}').load();
@@ -178,6 +189,21 @@
                 $('#deniedModal').modal('show');
             }
         }
+        
+        $('.btn-check').change(function() { //Table Filter
+            var selectedOption = $("input[name='btnradio']:checked").attr('id');
+            switch(selectedOption) {
+                case 'btn-active':
+                    $('#contracttable').DataTable().ajax.url('{{ route("getactivepurchasecontracts") }}').load();
+                    break;
+                case 'btn-inactive':
+                    $('#contracttable').DataTable().ajax.url('{{ route("getinactivepurchasecontracts") }}').load();
+                    break;
+                case 'btn-all':
+                    $('#contracttable').DataTable().ajax.url('{{ route("getpurchasecontracts") }}').load();
+                    break;
+            }
+        });
 
         $(document).ready(function(){
         // Show the collapse on page load
@@ -304,37 +330,6 @@
             var endDate = $('#enddateedit');
             endDate.prop('disabled', true);
         })
-
-        var endDateInput = document.getElementById('enddate');
-        var startDateLabel = document.getElementById('notistartdate');
-        var monthsBeforeInput = document.getElementById('monthsbefore');
-
-        endDateInput.addEventListener('input', function () {
-            // Get the selected date value
-            var selectedDate = endDateInput.value;
-            var monthsBefore = monthsBeforeInput.value;
-
-            // Calculate one month before the selected date
-            var oneMonthBefore = new Date(selectedDate);
-            oneMonthBefore.setMonth(oneMonthBefore.getMonth() - parseInt(monthsBefore));
-            oneMonthBefore.setDate(oneMonthBefore.getDate() + 1);
-
-            startDateLabel.innerHTML = '<i class="far fa-bell"></i>  Start Date: ' + oneMonthBefore.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        });
-
-        
-        //Changes start date when user enters how many months before
-        monthsBeforeInput.addEventListener('input', function () {
-            var selectedDate = new Date(endDateInput.value);
-            var monthsBefore = monthsBeforeInput.value;
-
-            var monthsBeforeDate = new Date(selectedDate);
-            monthsBeforeDate.setMonth(monthsBeforeDate.getMonth() - parseInt(monthsBefore));
-            monthsBeforeDate.setDate(monthsBeforeDate.getDate() + 1);
-            startDateLabel.innerHTML = '<i class="far fa-bell"></i>  Start Date: ' + monthsBeforeDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-
-
-        });
         
         </script>
     

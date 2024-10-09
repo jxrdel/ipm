@@ -29,4 +29,20 @@ class PurchaseContracts extends Model
         'ExternalPurchaseId',
         'InternalContactId',
     ];
+
+    public function internalcontacts()
+    {
+        return $this->belongsToMany(InternalContacts::class, 'InternalContactPurchaseContracts', 'PurchaseContractId', 'InternalContactId');
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notifications::class, 'ItemId', 'ID')
+            ->where('TypeId', 1); // Ensure TypeId is 1 for PurchaseContracts
+    }
+
+    public function uploads()
+    {
+        return $this->hasMany(PurchaseContractUploads::class, 'PurchaseContractID', 'ID');
+    }
 }

@@ -29,7 +29,7 @@
                     <div class="col-10">
                         @auth
                             @if (auth()->user()->hasPermission('PurchaseContract : Create : Screen'))
-                                <a type="button" data-bs-toggle="modal" data-bs-target="#createPCModal" class="btn btn-primary btn-icon-split" style="width: 12rem">
+                                <a href="{{route('employeecontracts.create')}}" class="btn btn-primary btn-icon-split" style="width: 12rem">
                                     <span class="icon text-white-50">
                                         <i class="fas fa-plus" style="color: white"></i>
                                     </span>
@@ -46,10 +46,20 @@
                         @endauth 
                     </div>
 
-                    <div class="col" style="justify-content: end">
-                        <button type="button" class="btn btn-primary" id="all-btn">All</button>
-                        <button type="button" class="btn btn-success" id="active-btn">Active</button>
-                        <button type="button" class="btn btn-warning" id="inactive-btn" style="color: black">Inactive</button>
+                    <div class="col"  style="text-align:right">
+                        
+                        <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+    
+                            <input type="radio" class="btn-check" name="btnradio" id="btn-active" autocomplete="off" checked>
+                            <label class="btn btn-outline-primary" for="btn-active">Active</label>
+                          
+                            <input type="radio" class="btn-check" name="btnradio" id="btn-all" autocomplete="off">
+                            <label class="btn btn-outline-primary" for="btn-all">All</label>
+                          
+                            <input type="radio" class="btn-check" name="btnradio" id="btn-inactive" autocomplete="off">
+                            <label class="btn btn-outline-primary" for="btn-inactive">Inactive</label>
+                          
+                        </div>
                     </div>
                 </div>
                 <div class="row" style="margin-top: 30px">
@@ -132,24 +142,26 @@
                             orderable: false,
                             searchable: false,
                             render: function (data, type, row) {
-                                return '<a href="#" onclick="showView(' + data.ID + ')">View</a> | <a href="#" onclick="showEdit(' + data.ID + ')">Edit</a> | <a href="#" onclick="showDelete(' + data.ID + ')">Delete</a>';
+                                return '<a href="#" onclick="showView(' + data.ID + ')">View</a> | <a href="EmployeeContracts/Edit/' + data.ID + '" >Edit</a> | <a href="#" onclick="showDelete(' + data.ID + ')">Delete</a>';
                             }
                         },
                 ]
             });
         });
-
-
-        $('#active-btn').on('click', function() {
-            $('#contracttable').DataTable().ajax.url('{{ route("getactiveemployeecontracts") }}').load();
-        });
-
-        $('#inactive-btn').on('click', function() {
-            $('#contracttable').DataTable().ajax.url('{{ route("getinactiveemployeecontracts") }}').load();
-        });
-
-        $('#all-btn').on('click', function() {
-            $('#contracttable').DataTable().ajax.url('{{ route("getemployeecontracts") }}').load();
+        
+        $('.btn-check').change(function() { //Table Filter
+            var selectedOption = $("input[name='btnradio']:checked").attr('id');
+            switch(selectedOption) {
+                case 'btn-active':
+                    $('#contracttable').DataTable().ajax.url('{{ route("getactiveemployeecontracts") }}').load();
+                    break;
+                case 'btn-inactive':
+                    $('#contracttable').DataTable().ajax.url('{{ route("getinactiveemployeecontracts") }}').load();
+                    break;
+                case 'btn-all':
+                    $('#contracttable').DataTable().ajax.url('{{ route("getemployeecontracts") }}').load();
+                    break;
+            }
         });
 
         

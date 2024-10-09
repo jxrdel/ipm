@@ -9,14 +9,18 @@ use App\Models\Notifications;
 use App\Models\PurchaseContracts;
 use App\Models\Purchases;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class CreatePurchaseContractModal extends Component
 {
+    use WithFileUploads;
+
     public $departmentaccess;
     public $name;
     public $purchaseditem;
@@ -25,6 +29,7 @@ class CreatePurchaseContractModal extends Component
     public $details;
     public $onlinelocation;
     public $manager;
+    public $selectednotifications = [];
     public $selectedec;
     public $selectedic = [];
     public $associatedec = [];
@@ -34,7 +39,9 @@ class CreatePurchaseContractModal extends Component
     public $startdate;
     public $enddate;
     public $monthsbefore = 1;
+    public $notidate;
 
+    public $uploads;
     public $purchases;
     public $managers;
     public $employees;
@@ -63,6 +70,7 @@ class CreatePurchaseContractModal extends Component
     #[On('set-internalcontacts')]
     public function setIC($values)
     {
+        dd($values);
         $this->internalcontacts = $values;
     }
 
@@ -78,6 +86,24 @@ class CreatePurchaseContractModal extends Component
         $this->empnotifications = $values;
     }
 
+    public function addNotification(){
+        if($this->notidate == null){
+            $this->dispatch('show-alert', message: "Please select a date");
+            return;
+        }else if (in_array($this->notidate, $this->selectednotifications)){
+            $this->dispatch('show-alert', message: "Notification already added");
+            return;
+        }else if (Carbon::parse($this->notidate) < Carbon::now()){
+            $this->dispatch('show-alert', message: "Notification date must be after today's date");
+            return;
+        }
+        $this->selectednotifications[] = $this->notidate;
+        $this->notidate = null;
+    }
+
+    public function removeNotification($index){
+        unset($this->selectednotifications[$index]);
+    }
 
     public function addEContact()
     {
@@ -131,139 +157,162 @@ class CreatePurchaseContractModal extends Component
     }
     public function createPC()
     {
-        // dd($this->empnotifications);
-        if ($this->isValidated()){
-            $isPerPetual = $this->isperpetual == 'true' ? 1 : 0;
-            if ($isPerPetual == 1) {
-                $this->enddate = null;
-            }
-            
-            $newitem = PurchaseContracts::create([
-                'Name' => $this->name,
-                'Details' => $this->details,
-                'FileNumber' => $this->filenumber,
-                'FileName' => $this->filename,
-                'OnlineLocation' => $this->onlinelocation,
-                'IsPerpetual' => $isPerPetual,
-                'StartDate' => $this->startdate,
-                'EndDate' => $this->enddate,
-                'Cost' => $this->cost,
-                'ExternalPurchaseId' => $this->purchaseditem,
-                'InternalContactId' => $this->manager,
+        DB::beginTransaction(); // Start the transaction
+    
+        try {
+            $this->validate([
+                'uploads.*' => 'file|max:5024',
             ]);
     
-            if ($this->departmentaccess !== ''){
-                DB::table('PurchaseContractBusinessGroups')->insert([
-                    'PurchaseContractId' => $newitem->ID,
-                    'BusinessGroupId' => $this->departmentaccess,
-                ]);
-            }
-            if (!empty($this->internalcontacts)) {
-                foreach ($this->internalcontacts as $internalcontact) {
-                    DB::table('InternalContactPurchaseContracts')->insert([
-                        'InternalContactId' => $internalcontact['value'],
-                        'PurchaseContractId' => $newitem->ID,
-                    ]);
+            if ($this->isValidated()) {
+                $isPerPetual = $this->isperpetual == 'true' ? 1 : 0;
+                if ($isPerPetual == 1) {
+                    $this->enddate = null;
                 }
-            }
     
-            if (!empty($this->associatedec)) {
-                foreach ($this->associatedec as $externalcontact) {
-                    DB::table('ExternalContactPurchaseContracts')->insert([
-                        'IsPrimary' => $externalcontact['ismaincontact'],
-                        'ExternalContactPersonId' => $externalcontact['contactid'],
-                        'PurchaseContractId' => $newitem->ID,
-                    ]);
-                }
-            }
-
-            if ($isPerPetual == 0) {
-                $notifications = [];
-                for ($i = $this->monthsbefore; $i >= 1; $i--){
-                    $enddate = Carbon::parse($this->enddate);
-                    $displaydate = $enddate;
-                    $displaydate = $displaydate->subMonths($i)->format('Y-m-d H:i:s');
-
-                    $notifications[] = [
-                        'label' => 'Please be advised that the contract for ' . $newitem->Name .' ends in ' . $i . ' month(s) on ' . Carbon::parse($this->enddate)->format('F jS, Y'),
-                        'itemname' => $newitem->Name, 
-                        'itemcontroller' => 'PurchaseContract', 
-                        'itemaction' => 'Details', 
-                        'itemid' => $newitem->ID, 
-                        'displaydate' => $displaydate, 
-                        'typeid' => 1,  
-                        'statusid' => 1, 
-                        'statuscreatorid' => Auth::user()->ID,
-                        'statuscreationdate' => Carbon::now('AST')->format('Y-m-d H:i:s')
-                    ];
-                    
-                }
-                //Make notifications for the final 3 weeks before the end date
-                for ($i = 3; $i >= 1; $i--){
-                    $enddate = Carbon::parse($this->enddate);
-                    $displaydate = $enddate;
-                    $displaydate = $displaydate->subWeeks($i)->format('Y-m-d H:i:s');
-
-                    $notifications[] = [
-                        'label' => 'Please be advised that the contract for ' . $newitem->Name .' ends in ' . $i . ' week(s) on ' . Carbon::parse($this->enddate)->format('F jS, Y'),
-                        'itemname' => $newitem->Name, 
-                        'itemcontroller' => 'PurchaseContract', 
-                        'itemaction' => 'Details', 
-                        'itemid' => $newitem->ID, 
-                        'displaydate' => $displaydate, 
-                        'typeid' => 1,  
-                        'statusid' => 1, 
-                        'statuscreatorid' => Auth::user()->ID,
-                        'statuscreationdate' => Carbon::now('AST')->format('Y-m-d H:i:s')
-                    ];
-                }
-                    
-                foreach ($notifications as $notification) { // Create notification
-                    $newnotification = Notifications::create([
-                        'Label' => $notification['label'],
-                        'ItemName' => $notification['itemname'],
-                        'ItemController' => $notification['itemcontroller'],
-                        'ItemAction' => $notification['itemaction'],
-                        'ItemId' => $notification['itemid'],
-                        'DisplayDate' => $notification['displaydate'],
-                        'TypeId' => $notification['typeid'],
-                        'StatusId' => $notification['statusid'],
-                        'StatusCreatorId' => $notification['statuscreatorid'],
-                        'StatusCreationDate' => $notification['statuscreationdate'],
-                    ]);
-
-                    foreach ($this->empnotifications as $employee){
-                        DB::table('InternalContactNotificationItems')->insert([
-                            'NotificationItemId' => $newnotification->ID,
-                            'InternalContactId' => $employee['value'],
+                // Create the PurchaseContract
+                $newitem = PurchaseContracts::create([
+                    'Name' => $this->name,
+                    'Details' => $this->details,
+                    'FileNumber' => $this->filenumber,
+                    'FileName' => $this->filename,
+                    'OnlineLocation' => $this->onlinelocation,
+                    'IsPerpetual' => $isPerPetual,
+                    'StartDate' => $this->startdate,
+                    'EndDate' => $this->enddate,
+                    'Cost' => $this->cost,
+                    'ExternalPurchaseId' => $this->purchaseditem,
+                    'InternalContactId' => $this->manager,
+                ]);
+    
+                // Upload photos if any
+                if (!is_null($this->uploads)) {
+                    foreach ($this->uploads as $photo) {
+                        $path = $photo->store('purchase_contracts', 'public');
+                        $newitem->uploads()->create([
+                            'FilePath' => $path,
+                            'UploadedBy' => Auth::user()->Name,
+                            'UploadedDate' => Carbon::now('AST')->format('Y-m-d H:i:s'),
                         ]);
-
                     }
                 }
+    
+                // Insert department access if available
+                if ($this->departmentaccess !== '') {
+                    DB::table('PurchaseContractBusinessGroups')->insert([
+                        'PurchaseContractId' => $newitem->ID,
+                        'BusinessGroupId' => $this->departmentaccess,
+                    ]);
+                }
+    
+                // Insert internal contacts
+                if (!empty($this->internalcontacts)) {
+                    foreach ($this->internalcontacts as $internalcontact) {
+                        DB::table('InternalContactPurchaseContracts')->insert([
+                            'InternalContactId' => $internalcontact['value'],
+                            'PurchaseContractId' => $newitem->ID,
+                        ]);
+                    }
+                }
+    
+                // Insert external contacts
+                if (!empty($this->associatedec)) {
+                    foreach ($this->associatedec as $externalcontact) {
+                        DB::table('ExternalContactPurchaseContracts')->insert([
+                            'IsPrimary' => $externalcontact['ismaincontact'],
+                            'ExternalContactPersonId' => $externalcontact['contactid'],
+                            'PurchaseContractId' => $newitem->ID,
+                        ]);
+                    }
+                }
+    
+                // Notifications if contract is not perpetual
+                if ($isPerPetual == 0) {
+                    $notifications = [];
+                    foreach ($this->selectednotifications as $notification) {
+                        $label = '';
+                        $difference = Carbon::parse($notification)->diff(Carbon::parse($this->enddate));
+    
+                        if ($difference->y > 0) {
+                            $label = 'Please be advised that the contract for ' . $newitem->Name . ' ends in ' . $difference->y . ' year(s), ' . $difference->m . ' month(s) and ' . $difference->d . ' day(s) on ' . Carbon::parse($this->enddate)->format('F jS, Y');
+                        } elseif ($difference->y < 1 && $difference->m > 0) {
+                            $label = 'Please be advised that the contract for ' . $newitem->Name . ' ends in ' . $difference->m . ' month(s) and ' . $difference->d . ' day(s) on ' . Carbon::parse($this->enddate)->format('F jS, Y');
+                        } elseif ($difference->y < 1 && $difference->m < 1 && $difference->d > 0) {
+                            $label = 'Please be advised that the contract for ' . $newitem->Name . ' ends in ' . $difference->d . ' day(s) on ' . Carbon::parse($this->enddate)->format('F jS, Y');
+                        }
+    
+                        $notifications[] = [
+                            'label' => $label,
+                            'itemname' => $newitem->Name,
+                            'itemcontroller' => 'PurchaseContract',
+                            'itemaction' => 'Details',
+                            'itemid' => $newitem->ID,
+                            'displaydate' => $notification,
+                            'typeid' => 1,
+                            'statusid' => 1,
+                            'statuscreatorid' => Auth::user()->ID,
+                            'statuscreationdate' => Carbon::now('AST')->format('Y-m-d H:i:s'),
+                        ];
+                    }
+    
+                    foreach ($notifications as $notification) {
+                        // Create notification
+                        $newnotification = Notifications::create([
+                            'Label' => $notification['label'],
+                            'ItemName' => $notification['itemname'],
+                            'ItemController' => $notification['itemcontroller'],
+                            'ItemAction' => $notification['itemaction'],
+                            'ItemId' => $notification['itemid'],
+                            'DisplayDate' => $notification['displaydate'],
+                            'TypeId' => $notification['typeid'],
+                            'StatusId' => $notification['statusid'],
+                            'StatusCreatorId' => $notification['statuscreatorid'],
+                            'StatusCreationDate' => $notification['statuscreationdate'],
+                        ]);
+    
+                        foreach ($this->empnotifications as $employee) {
+                            DB::table('InternalContactNotificationItems')->insert([
+                                'NotificationItemId' => $newnotification->ID,
+                                'InternalContactId' => $employee['value'],
+                            ]);
+                        }
+                    }
+                }
+    
+                // Clear the form fields after successful save
+                $this->resetFormFields();
+    
+                // Dispatch events
+                $this->dispatch('close-create-modal');
+                $this->dispatch('refresh-table');
+                $this->dispatch('show-create-success');
+    
+                DB::commit(); // Commit the transaction if everything was successful
             }
-    
-            $this->name = null;
-            $this->purchaseditem = null;
-            $this->filenumber = null;
-            $this->filename = null;
-            $this->details = null;
-            $this->onlinelocation = null;
-            $this->manager = null;
-            $this->selectedec = null;
-            $this->selectedic = [];
-            $this->associatedec = [];
-            $this->internalcontacts = [];
-            $this->excludedContacts = [];
-            $this->cost = null;
-            $this->isperpetual = "true";
-            $this->startdate = null;
-            $this->enddate = null;
-    
-            $this->dispatch('close-create-modal');
-            $this->dispatch('refresh-table');
-            $this->dispatch('show-create-success');
+        } catch (Exception $e) {
+            dd($e);
+            DB::rollBack(); // Rollback the transaction in case of any error
         }
-        
+    }
+
+    public function resetFormFields()
+    {
+        $this->name = null;
+        $this->purchaseditem = null;
+        $this->filenumber = null;
+        $this->filename = null;
+        $this->details = null;
+        $this->onlinelocation = null;
+        $this->manager = null;
+        $this->selectedec = null;
+        $this->selectedic = [];
+        $this->associatedec = [];
+        $this->internalcontacts = [];
+        $this->excludedContacts = [];
+        $this->cost = null;
+        $this->isperpetual = "true";
+        $this->startdate = null;
+        $this->enddate = null;
     }
 
     public function toggleMainContact($index)
