@@ -141,7 +141,7 @@
                     </div>
                 </div>
     
-                <div x-show="isperpetual == 'false'" class="row" style="margin-top: 30px" id="hidden-row">
+                <div x-transition x-show="isperpetual == 'false'" class="row" style="margin-top: 30px" id="hidden-row">
     
                     <hr class="border border-secondary border-3 opacity-35" style="margin-top:15px">
                     <p class="text-center fw-bold fs-5">Notifications</p>
@@ -282,6 +282,14 @@
 <script>
     $(document).ready(function() {
         // Initialize select2
+        
+
+    window.addEventListener('show-alert', event => {
+            var message = event.detail.message;
+
+            // Display an alert with the received message
+            alert(message);
+        })
         
         $('#internalContactSelect').select2();
         

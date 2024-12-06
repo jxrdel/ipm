@@ -45,15 +45,16 @@ class ContractReminder extends Mailable
         $daysDifference = $today->diffInDays(Carbon::parse($this->notification->contract->EndDate)) + 1;
 
         if ($this->notification->ItemId == 1){
-            $url = 'http://10.100.0.86:5050/PurchaseContracts';
+            $url = 'https://contracts.moh.gov.tt/PurchaseContracts';
         }else{
-            $url = 'http://10.100.0.86:5050/EmployeeContracts';
+            $url = 'https://contracts.moh.gov.tt/EmployeeContracts';
         }
 
         return new Content(
             markdown: 'contractreminder',
             with: [
                 'itemname' => $this->notification->ItemName,
+                'label' => $this->notification->Label,
                 'enddate' => $enddate,
                 'daysdifference' => $daysDifference,
                 'url' => $url,
