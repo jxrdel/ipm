@@ -51,6 +51,8 @@ class EditPurchaseContract extends Component
     public $startdate;
     public $enddate;
     public $notidate;
+    public $notification_message;
+    public $is_custom_notification = false;
     public $fileuploads;
     public $uploadInput;
 
@@ -62,8 +64,8 @@ class EditPurchaseContract extends Component
     public $internalcontacts;
     public $empnotifications;
     public $extcontacts;
-    
-    #[Title('Edit Purchase Contract')] 
+
+    #[Title('Edit Purchase Contract')]
 
     public function render()
     {
@@ -110,27 +112,27 @@ class EditPurchaseContract extends Component
 
         $this->associatedic = $internalcontacts;
         // $this->associatedic = json_decode(json_encode($this->associatedic), true);
-        
+
         //Get notified users
         $notifiedusers = DB::table('NotificationItems') //Find any notification item for this purchase
             ->where('ItemId', $this->purchaseid)
             ->where('TypeId', 1)
             ->first();
-            // dd($notifiedusers);
+        // dd($notifiedusers);
 
-        if($notifiedusers){
+        if ($notifiedusers) {
             $notifiedusers = DB::table('InternalContactNotificationItems') //Get users who receive notifications for this item
-            ->where('NotificationItemId', $notifiedusers->ID)
-            ->join('InternalContacts', 'InternalContactNotificationItems.InternalContactId', '=', 'InternalContacts.ID')
-            ->select('InternalContactNotificationItems.*', 'InternalContacts.FirstName', 'InternalContacts.LastName')
-            ->get()
-            ->pluck('InternalContactId');
+                ->where('NotificationItemId', $notifiedusers->ID)
+                ->join('InternalContacts', 'InternalContactNotificationItems.InternalContactId', '=', 'InternalContacts.ID')
+                ->select('InternalContactNotificationItems.*', 'InternalContacts.FirstName', 'InternalContacts.LastName')
+                ->get()
+                ->pluck('InternalContactId');
 
             $this->usernotifications = $notifiedusers;
         }
 
         $this->notifications = $this->contract->notifications;
-            
+
 
         $this->notifications = json_decode(json_encode($this->notifications), true);
 
@@ -143,8 +145,9 @@ class EditPurchaseContract extends Component
         $this->associatedec = $externalcontacts;
         $this->associatedec = json_decode(json_encode($this->associatedec), true);
     }
-    
-    public function editPC(){
+
+    public function editPC()
+    {
 
         PurchaseContracts::where('ID', $this->purchaseid)->update([
             'Name' => $this->name,
@@ -159,12 +162,12 @@ class EditPurchaseContract extends Component
             'InternalContactId' => $this->manager,
         ]);
 
-        if($this->isEditedIC){
+        if ($this->isEditedIC) {
             $this->contract->internalcontacts()->sync($this->editedIC);
         }
-        
-        foreach ($this->associatedec as $contact){ // Insert associated external contact
-            if($contact['ID'] == null){
+
+        foreach ($this->associatedec as $contact) { // Insert associated external contact
+            if ($contact['ID'] == null) {
                 DB::table('ExternalContactPurchaseContracts')->insert([
                     'IsPrimary' => $contact['IsPrimary'],
                     'PurchaseContractId' => $contact['PurchaseContractId'],
@@ -173,50 +176,50 @@ class EditPurchaseContract extends Component
             }
         }
 
-        foreach ($this->ECToDelete as $contact){
-            if($contact['ID'] !== null){ //Items in the array with null ID were not in the database to begin with so they do not need to be deleted
+        foreach ($this->ECToDelete as $contact) {
+            if ($contact['ID'] !== null) { //Items in the array with null ID were not in the database to begin with so they do not need to be deleted
                 DB::table('ExternalContactPurchaseContracts')
-                ->where('ID', $contact['ID'])
-                ->delete();
+                    ->where('ID', $contact['ID'])
+                    ->delete();
             }
         }
 
-        foreach ($this->NotificationsToDelete as $notification){
-            if($notification['ID'] !== null){ //Items in the array with null ID were not in the database to begin with so they do not need to be deleted
+        foreach ($this->NotificationsToDelete as $notification) {
+            if ($notification['ID'] !== null) { //Items in the array with null ID were not in the database to begin with so they do not need to be deleted
                 DB::table('NotificationItems')
-                ->where('ID', $notification['ID'])
-                ->delete();
+                    ->where('ID', $notification['ID'])
+                    ->delete();
             }
         }
 
-        foreach($this->notifications as $notification){ // Save new notifications
+        foreach ($this->notifications as $notification) { // Save new notifications
             $newNotifications = [];
-            if($notification['ID'] == null){
+            if ($notification['ID'] == null) {
                 $label = '';
                 $difference = Carbon::parse($notification['DisplayDate'])->diff(Carbon::parse($this->enddate));
 
-                if($difference->y > 0){
-                    $label = 'Please be advised that the contract for ' . $this->name .' ends in ' . $difference->y . ' year(s) ,' . $difference->m . ' month(s) and ' . $difference->d . ' day(s) on ' . Carbon::parse($this->enddate)->format('F jS, Y'); 
-                }else if($difference->y < 1 && $difference->m > 0){
-                    $label = 'Please be advised that the contract for ' . $this->name .' ends in ' . $difference->m . ' month(s) and ' . $difference->d . ' day(s) on ' . Carbon::parse($this->enddate)->format('F jS, Y');
-                }else if($difference->y < 1 && $difference->m < 1 && $difference->d > 0){
-                    $label = 'Please be advised that the contract for ' . $this->name .' ends in ' . $difference->d . ' day(s) on ' . Carbon::parse($this->enddate)->format('F jS, Y');
+                if ($difference->y > 0) {
+                    $label = 'Please be advised that the contract for ' . $this->name . ' ends in ' . $difference->y . ' year(s) ,' . $difference->m . ' month(s) and ' . $difference->d . ' day(s) on ' . Carbon::parse($this->enddate)->format('F jS, Y');
+                } else if ($difference->y < 1 && $difference->m > 0) {
+                    $label = 'Please be advised that the contract for ' . $this->name . ' ends in ' . $difference->m . ' month(s) and ' . $difference->d . ' day(s) on ' . Carbon::parse($this->enddate)->format('F jS, Y');
+                } else if ($difference->y < 1 && $difference->m < 1 && $difference->d > 0) {
+                    $label = 'Please be advised that the contract for ' . $this->name . ' ends in ' . $difference->d . ' day(s) on ' . Carbon::parse($this->enddate)->format('F jS, Y');
                 }
                 $newNotifications[] = [
                     'label' => $label,
-                    'itemname' => $this->name, 
-                    'itemcontroller' => 'PurchaseContract', 
-                    'itemaction' => 'Details', 
-                    'itemid' => $this->purchaseid, 
-                    'displaydate' => $notification['DisplayDate'], 
-                    'typeid' => 1,  
-                    'statusid' => 1, 
+                    'itemname' => $this->name,
+                    'itemcontroller' => 'PurchaseContract',
+                    'itemaction' => 'Details',
+                    'itemid' => $this->purchaseid,
+                    'displaydate' => $notification['DisplayDate'],
+                    'typeid' => 1,
+                    'statusid' => 1,
                     'statuscreatorid' => Auth::user()->ID,
                     'statuscreationdate' => Carbon::now('AST')->format('Y-m-d H:i:s')
                 ];
             }
-            
-                    
+
+
             foreach ($newNotifications as $notification) { // Create notification
                 $newnotification = Notifications::create([
                     'Label' => $notification['label'],
@@ -230,40 +233,44 @@ class EditPurchaseContract extends Component
                     'StatusCreatorId' => $notification['statuscreatorid'],
                     'StatusCreationDate' => $notification['statuscreationdate'],
                 ]);
-                
 
-                if($this->isEditedUN){
+
+                if ($this->isEditedUN) {
                     $newnotification->internalcontacts()->sync($this->editedUN);
-                }else{
+                } else {
                     $newnotification->internalcontacts()->sync($this->contract->notifications->first()->internalcontacts->pluck('ID'));
                 }
             }
         }
 
-        if($this->isEditedUN){
-            foreach($this->contract->notifications as $notification){
+        if ($this->isEditedUN) {
+            foreach ($this->contract->notifications as $notification) {
                 $notification->internalcontacts()->sync($this->editedUN);
             }
         }
-        
+
         return redirect()->route('purchasecontracts')->with('success', 'Purchase Contract updated successfully');
     }
 
     public function addInternalContact()
     {
-        if ($this->selectedic == ''){
+        if ($this->selectedic == '') {
             $message = "Please select a contact";
             $this->dispatch('show-alert', message: $message);
         } else {
             $contactid = $this->selectedic;
             $contact = InternalContacts::find($contactid);
-            $this->associatedic[] = [   'ID' => null, 'InternalContactId' => $contactid, 'PurchaseContractId' => $this->purchaseid, 
-                                        'FirstName' => $contact->FirstName, 'LastName' => $contact->LastName
-                                    ];
-    
+            $this->associatedic[] = [
+                'ID' => null,
+                'InternalContactId' => $contactid,
+                'PurchaseContractId' => $this->purchaseid,
+                'FirstName' => $contact->FirstName,
+                'LastName' => $contact->LastName
+            ];
+
             //Remove company from drop down after it is selected
             $this->excludedIC = array_column($this->associatedic, 'InternalContactId');
-    
+
             // session(['selectedCompanies' => $this->selectedCompanies]);
             $this->selectedic = null;
         }
@@ -282,19 +289,23 @@ class EditPurchaseContract extends Component
     public function addNotifiedUser()
     {
         // dd($this->usernotifications);
-        if ($this->selectedusernotification == ''){
+        if ($this->selectedusernotification == '') {
             $message = "Please select a contact";
             $this->dispatch('show-alert', message: $message);
         } else {
             $contactid = $this->selectedusernotification;
             $contact = InternalContacts::find($contactid);
-            $this->usernotifications[] = [   'ID' => null, 'InternalContactId' => $contactid, 'NotificationItemId' => null, 
-                                        'FirstName' => $contact->FirstName, 'LastName' => $contact->LastName
-                                    ];
-    
+            $this->usernotifications[] = [
+                'ID' => null,
+                'InternalContactId' => $contactid,
+                'NotificationItemId' => null,
+                'FirstName' => $contact->FirstName,
+                'LastName' => $contact->LastName
+            ];
+
             //Remove company from drop down after it is selected
             $this->excludedUsers = array_column($this->usernotifications, 'InternalContactId');
-    
+
             // session(['selectedCompanies' => $this->selectedCompanies]);
             $this->selectedusernotification = null;
         }
@@ -306,27 +317,32 @@ class EditPurchaseContract extends Component
         $this->UNToDelete[] = $this->usernotifications[$index];
         unset($this->usernotifications[$index]);
 
-        
+
         $this->excludedUsers = array_column($this->usernotifications, 'InternalContactId');
     }
 
     public function addExternalContact()
     {
         // dd($this->associatedec);
-        if ($this->selectedec == ''){
+        if ($this->selectedec == '') {
             $message = "Please select a contact";
             $this->dispatch('show-alert', message: $message);
         } else {
             $contactid = $this->selectedec;
             $contact = ExternalPersons::find($contactid);
             $contactname = $contact->FirstName . ' ' . $contact->LastName;
-            $this->associatedec[] = [   'ID' => null, 'IsPrimary' => 1, 'PurchaseContractId' => $this->purchaseid, 'ExternalContactPersonId' => $contactid, 
-                                        'FirstName' => $contact->FirstName, 'LastName' => $contact->LastName
-                                    ];
-    
+            $this->associatedec[] = [
+                'ID' => null,
+                'IsPrimary' => 1,
+                'PurchaseContractId' => $this->purchaseid,
+                'ExternalContactPersonId' => $contactid,
+                'FirstName' => $contact->FirstName,
+                'LastName' => $contact->LastName
+            ];
+
             //Remove company from drop down after it is selected
             $this->excludedEC = array_column($this->associatedec, 'ExternalContactPersonId');
-    
+
             // session(['selectedCompanies' => $this->selectedCompanies]);
             $this->selectedec = null;
         }
@@ -350,20 +366,30 @@ class EditPurchaseContract extends Component
 
     public function addNotification()
     {
-
-        if($this->notidate == null){
-            $this->dispatch('show-alert', message: "Please select a date");
+        $this->resetValidation();
+        if ($this->notidate == null || trim($this->notidate) == '') {
+            // $this->dispatch('show-alert', message: "Please select a date");
+            $this->addError('notidate', 'Please select a date');
             return;
-        }else if (in_array(Carbon::parse($this->notidate)->format('Y-m-d H:i:s.v'), array_column($this->notifications, 'DisplayDate'))){
-            $this->dispatch('show-alert', message: "Notification already added");
+        } else if (in_array(Carbon::parse($this->notidate)->format('Y-m-d H:i:s.v'), array_column($this->notifications, 'DisplayDate'))) {
+            $this->addError('notidate', 'Notification already added');
             return;
-        }else if (Carbon::parse($this->notidate) < Carbon::now()){
-            $this->dispatch('show-alert', message: "Notification date must be after today's date");
+        } else if (Carbon::parse($this->notidate) < Carbon::now()) {
+            $this->addError('notidate', 'Notification date must be after today');
+            return;
+        } else if ($this->is_custom_notification && ($this->notification_message == null || trim($this->notification_message) == '')) {
+            $this->addError('notification_message', 'Please enter a message');
             return;
         }
 
-        $this->notifications[] = ['ID' => null, 'DisplayDate' => $this->notidate];
+        $this->notifications[] = ['ID' => null, 'DisplayDate' => $this->notidate, 'IsCustomNotification' => $this->is_custom_notification, 'NotificationMessage' => $this->notification_message];
+
         $this->notidate = null;
+        $this->notification_message = null;
+        $this->is_custom_notification = false;
+
+        $this->dispatch('close-notification-modal');
+        $this->dispatch('show-message', message: 'Notification added successfully');
     }
 
     public function removeNotification($index)
@@ -372,7 +398,8 @@ class EditPurchaseContract extends Component
         unset($this->notifications[$index]);
     }
 
-    public function uploadFiles(){
+    public function uploadFiles()
+    {
         if (!is_null($this->uploadInput)) {
             // dd($this->uploadInput);
             $path = $this->uploadInput->store('purchase_contracts', 'public');
@@ -384,12 +411,13 @@ class EditPurchaseContract extends Component
 
             $this->uploadInput = null;
             $this->dispatch('show-message', message: 'File uploaded successfully');
-        }else{
+        } else {
             $this->dispatch('show-alert', message: 'Please select a file to upload');
         }
     }
 
-    public function deleteUpload($id){
+    public function deleteUpload($id)
+    {
         $upload = $this->contract->uploads->where('ID', $id)->first();
         $upload->delete();
         Storage::delete('public/' . $upload->FilePath);
