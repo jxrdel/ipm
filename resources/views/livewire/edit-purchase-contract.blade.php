@@ -156,12 +156,6 @@
                 <div class="row" style="margin-top: 30px">
                     <div class="col" style="text-align: center;padding-bottom:10px">
 
-                        {{-- <label for="title">Add Notification &nbsp;</label>
-                        <input wire:model="notidate" type="date" class="form-control"
-                            style="display: inline;width: 400px">
-                        <button wire:click.prevent="addNotification()" class="btn btn-primary"
-                            style="width: 12rem"><i class="fas fa-plus"></i> Add Notification</button> --}}
-
                         <a type="button" data-bs-toggle="modal" data-bs-target="#addNotificationModal"
                             class="btn btn-primary btn-icon-split" style="width: 12rem">
                             <span class="icon text-white-50">
@@ -192,7 +186,7 @@
                                     </td>
                                     <td>
                                         @if ($notification['IsCustomNotification'])
-                                            {{ $notification['NotificationMessage'] }}
+                                            {{ $notification['CustomMessage'] }}
                                         @else
                                             Default reminder
                                         @endif

@@ -20,10 +20,7 @@ class ContractReminder extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct(public Notifications $notification)
-    {
-        
-    }
+    public function __construct(public Notifications $notification) {}
 
     /**
      * Get the message envelope.
@@ -40,23 +37,36 @@ class ContractReminder extends Mailable
      */
     public function content(): Content
     {
-        $enddate = Carbon::parse($this->notification->contract->EndDate)->format('l, M jS Y');
         $today = Carbon::now();
-        $daysDifference = $today->diffInDays(Carbon::parse($this->notification->contract->EndDate)) + 1;
+        $enddate = Carbon::parse($this->notification->contract->EndDate)->format('l, M jS Y');
+        $difference = Carbon::parse($today)->diff($enddate);
 
-        if ($this->notification->ItemId == 1){
+        $label = '';
+
+        if ($this->notification->IsCustomNotification) {
+            $label = $this->notification->CustomMessage;
+        } else {
+            if ($difference->y > 0) {
+                $label = 'Please be advised that the contract for ' . $this->notification->ItemName . ' ends in ' . $difference->y . ' year(s), ' . $difference->m . ' month(s) and ' . $difference->d . ' day(s) on ' . Carbon::parse($enddate)->format('F jS, Y');
+            } elseif ($difference->y < 1 && $difference->m > 0) {
+                $label = 'Please be advised that the contract for ' . $this->notification->ItemName . ' ends in ' . $difference->m . ' month(s) and ' . $difference->d . ' day(s) on ' . Carbon::parse($enddate)->format('F jS, Y');
+            } elseif ($difference->y < 1 && $difference->m < 1 && $difference->d > 0) {
+                $label = 'Please be advised that the contract for ' . $this->notification->ItemName . ' ends in ' . $difference->d . ' day(s) on ' . Carbon::parse($enddate)->format('F jS, Y');
+            } elseif ($difference->y < 1 && $difference->m < 1 && $difference->d < 1) {
+                $label = 'Please be advised that the contract for ' . $this->notification->ItemName . ' ends today on ' . Carbon::parse($enddate)->format('F jS, Y');
+            }
+        }
+
+        if ($this->notification->TypeId == 1) {
             $url = 'https://contracts.moh.gov.tt/PurchaseContracts';
-        }else{
+        } else {
             $url = 'https://contracts.moh.gov.tt/EmployeeContracts';
         }
 
         return new Content(
             markdown: 'contractreminder',
             with: [
-                'itemname' => $this->notification->ItemName,
-                'label' => $this->notification->Label,
-                'enddate' => $enddate,
-                'daysdifference' => $daysDifference,
+                'label' => $label,
                 'url' => $url,
             ],
         );

@@ -212,6 +212,8 @@ class EditPurchaseContract extends Component
                     'itemaction' => 'Details',
                     'itemid' => $this->purchaseid,
                     'displaydate' => $notification['DisplayDate'],
+                    'IsCustomNotification' => $notification['IsCustomNotification'],
+                    'CustomMessage' => $notification['CustomMessage'],
                     'typeid' => 1,
                     'statusid' => 1,
                     'statuscreatorid' => Auth::user()->ID,
@@ -230,11 +232,14 @@ class EditPurchaseContract extends Component
                     'DisplayDate' => $notification['displaydate'],
                     'TypeId' => $notification['typeid'],
                     'StatusId' => $notification['statusid'],
+                    'IsCustomNotification' => $notification['IsCustomNotification'],
+                    'CustomMessage' => $notification['CustomMessage'],
                     'StatusCreatorId' => $notification['statuscreatorid'],
                     'StatusCreationDate' => $notification['statuscreationdate'],
                 ]);
 
 
+                //Set users to be notified
                 if ($this->isEditedUN) {
                     $newnotification->internalcontacts()->sync($this->editedUN);
                 } else {
@@ -382,7 +387,7 @@ class EditPurchaseContract extends Component
             return;
         }
 
-        $this->notifications[] = ['ID' => null, 'DisplayDate' => $this->notidate, 'IsCustomNotification' => $this->is_custom_notification, 'NotificationMessage' => $this->notification_message];
+        $this->notifications[] = ['ID' => null, 'DisplayDate' => $this->notidate, 'IsCustomNotification' => $this->is_custom_notification, 'CustomMessage' => $this->notification_message];
 
         $this->notidate = null;
         $this->notification_message = null;

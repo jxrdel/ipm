@@ -21,8 +21,8 @@ use Livewire\Attributes\Title;
 class CreatePurchaseContract extends Component
 {
     use WithFileUploads;
-    
-    #[Title('Create Purchase Contract')] 
+
+    #[Title('Create Purchase Contract')]
 
     public $departmentaccess;
     public $name;
@@ -32,7 +32,7 @@ class CreatePurchaseContract extends Component
     public $details;
     public $onlinelocation;
     public $manager;
-    public $selectednotifications = [];
+    public $notifications = [];
     public $selectedec;
     public $selectedic = [];
     public $associatedec = [];
@@ -43,6 +43,8 @@ class CreatePurchaseContract extends Component
     public $enddate;
     public $monthsbefore = 1;
     public $notidate;
+    public $notification_message;
+    public $is_custom_notification = false;
 
     public $uploads;
     public $purchases;
@@ -67,7 +69,6 @@ class CreatePurchaseContract extends Component
         $this->departments = Departments::all();
         $this->extcontacts = ExternalPersons::all();
         $this->loggedinuser = Auth::user()->internalcontact->ID;
-
     }
 
     #[On('set-internalcontacts')]
@@ -88,28 +89,43 @@ class CreatePurchaseContract extends Component
         $this->empnotifications = $values;
     }
 
-    public function addNotification(){
-        if($this->notidate == null){
-            $this->dispatch('show-alert', message: "Please select a date");
+    public function addNotification()
+    {
+
+        $this->resetValidation();
+        if ($this->notidate == null || trim($this->notidate) == '') {
+            // $this->dispatch('show-alert', message: "Please select a date");
+            $this->addError('notidate', 'Please select a date');
             return;
-        }else if (in_array($this->notidate, $this->selectednotifications)){
-            $this->dispatch('show-alert', message: "Notification already added");
+        } else if (in_array($this->notidate, array_column($this->notifications, 'DisplayDate'))) {
+            $this->addError('notidate', 'Notification already added');
             return;
-        }else if (Carbon::parse($this->notidate) < Carbon::now()){
-            $this->dispatch('show-alert', message: "Notification date must be after today's date");
+        } else if (Carbon::parse($this->notidate) < Carbon::now()) {
+            $this->addError('notidate', 'Notification date must be after today');
+            return;
+        } else if ($this->is_custom_notification && ($this->notification_message == null || trim($this->notification_message) == '')) {
+            $this->addError('notification_message', 'Please enter a message');
             return;
         }
-        $this->selectednotifications[] = $this->notidate;
+
+        $this->notifications[] = ['DisplayDate' => $this->notidate, 'IsCustomNotification' => $this->is_custom_notification, 'CustomMessage' => $this->notification_message];
+
         $this->notidate = null;
+        $this->notification_message = null;
+        $this->is_custom_notification = false;
+
+        $this->dispatch('close-notification-modal');
+        $this->dispatch('show-message', message: 'Notification added successfully');
     }
 
-    public function removeNotification($index){
-        unset($this->selectednotifications[$index]);
+    public function removeNotification($index)
+    {
+        unset($this->notifications[$index]);
     }
 
     public function addEContact()
     {
-        if ($this->selectedec == ''){
+        if ($this->selectedec == '') {
             $message = "Please select a contact";
             $this->dispatch('show-alert', message: $message);
         } else {
@@ -117,10 +133,10 @@ class CreatePurchaseContract extends Component
             $contact = ExternalPersons::find($contactid);
             $contactname = $contact->FirstName . ' ' . $contact->LastName;
             $this->associatedec[] = ['contactid' => $contactid, 'contactname' => $contactname, 'ismaincontact' => 0];
-    
+
             //Remove company from drop down after it is selected
             $this->excludedContacts = array_column($this->associatedec, 'contactid');
-    
+
             // session(['selectedCompanies' => $this->selectedCompanies]);
             $this->selectedec = null;
         }
@@ -147,7 +163,7 @@ class CreatePurchaseContract extends Component
             'enddate' => $this->enddate, // Add enddate for validation
             'isperpetual' => $this->isperpetual, // Add isperpetual for validation
             'empnotifications' => $this->empnotifications,
-            'selectednotifications' => $this->selectednotifications,
+            'notifications' => $this->notifications,
         ], [
             'uploads.*' => 'nullable|file|max:5024',
             'departmentaccess' => 'required',
@@ -158,25 +174,26 @@ class CreatePurchaseContract extends Component
             'startdate' => 'required',
             'enddate' => 'required_if:isperpetual,false', // Make enddate required if isperpetual is false
             'empnotifications' => 'required_if:isperpetual,false|array|min:1',
-            'selectednotifications' => 'required_if:isperpetual,false|array|min:1',
+            'notifications' => 'required_if:isperpetual,false|array|min:1',
         ], [
-            'internalcontacts.required' => 'Please select at least one associated internal contact.', // Custom error message
-            'empnotifications.required_if' => 'You must select at least 1 user to receive notifications.', // Custom error message
-            'selectednotifications.required_if' => 'Please select at least one notification date.', // Custom error message
+            'departmentaccess.required' => 'Please select a department.',
+            'internalcontacts.required' => 'Please select at least one internal contact.',
+            'empnotifications.required_if' => 'You must select at least 1 user to receive notifications.',
+            'notifications.required_if' => 'Please select at least one notification date.',
         ]);
-    
+
         // Check if validation fails
         if ($validator->fails()) {
             // Dispatch the browser event to scroll to the error
             $this->setErrorBag($validator->errors()); // Set the error bag for Livewire
             $this->dispatch('scrollToError');
-    
+
             // Optionally return early to prevent further execution
             return;
         }
 
         DB::beginTransaction(); // Start the transaction
-    
+
         try {
 
             $isPerPetual = $this->isperpetual == 'true' ? 1 : 0;
@@ -238,16 +255,20 @@ class CreatePurchaseContract extends Component
             // Notifications if contract is not perpetual
             if ($isPerPetual == 0) {
                 $notifications = [];
-                foreach ($this->selectednotifications as $notification) {
+                foreach ($this->notifications as $notification) {
                     $label = '';
-                    $difference = Carbon::parse($notification)->diff(Carbon::parse($this->enddate));
+                    $difference = Carbon::parse($notification['DisplayDate'])->diff(Carbon::parse($this->enddate));
 
-                    if ($difference->y > 0) {
-                        $label = 'Please be advised that the contract for ' . $newitem->Name . ' ends in ' . $difference->y . ' year(s), ' . $difference->m . ' month(s) and ' . $difference->d . ' day(s) on ' . Carbon::parse($this->enddate)->format('F jS, Y');
-                    } elseif ($difference->y < 1 && $difference->m > 0) {
-                        $label = 'Please be advised that the contract for ' . $newitem->Name . ' ends in ' . $difference->m . ' month(s) and ' . $difference->d . ' day(s) on ' . Carbon::parse($this->enddate)->format('F jS, Y');
-                    } elseif ($difference->y < 1 && $difference->m < 1 && $difference->d > 0) {
-                        $label = 'Please be advised that the contract for ' . $newitem->Name . ' ends in ' . $difference->d . ' day(s) on ' . Carbon::parse($this->enddate)->format('F jS, Y');
+                    if ($notification['IsCustomNotification']) {
+                        $label = $notification['CustomMessage'];
+                    } else {
+                        if ($difference->y > 0) {
+                            $label = 'Please be advised that the contract for ' . $newitem->Name . ' ends in ' . $difference->y . ' year(s), ' . $difference->m . ' month(s) and ' . $difference->d . ' day(s) on ' . Carbon::parse($this->enddate)->format('F jS, Y');
+                        } elseif ($difference->y < 1 && $difference->m > 0) {
+                            $label = 'Please be advised that the contract for ' . $newitem->Name . ' ends in ' . $difference->m . ' month(s) and ' . $difference->d . ' day(s) on ' . Carbon::parse($this->enddate)->format('F jS, Y');
+                        } elseif ($difference->y < 1 && $difference->m < 1 && $difference->d > 0) {
+                            $label = 'Please be advised that the contract for ' . $newitem->Name . ' ends in ' . $difference->d . ' day(s) on ' . Carbon::parse($this->enddate)->format('F jS, Y');
+                        }
                     }
 
                     $notifications[] = [
@@ -256,11 +277,13 @@ class CreatePurchaseContract extends Component
                         'itemcontroller' => 'PurchaseContract',
                         'itemaction' => 'Details',
                         'itemid' => $newitem->ID,
-                        'displaydate' => $notification,
+                        'displaydate' => $notification['DisplayDate'],
                         'typeid' => 1,
                         'statusid' => 1,
                         'statuscreatorid' => Auth::user()->ID,
                         'statuscreationdate' => Carbon::now('AST')->format('Y-m-d H:i:s'),
+                        'IsCustomNotification' => $notification['IsCustomNotification'],
+                        'CustomMessage' => $notification['CustomMessage'],
                     ];
                 }
 
@@ -277,6 +300,8 @@ class CreatePurchaseContract extends Component
                         'StatusId' => $notification['statusid'],
                         'StatusCreatorId' => $notification['statuscreatorid'],
                         'StatusCreationDate' => $notification['statuscreationdate'],
+                        'IsCustomNotification' => $notification['IsCustomNotification'],
+                        'CustomMessage' => $notification['CustomMessage'],
                     ]);
 
                     $newnotification->internalcontacts()->attach($this->empnotifications);
