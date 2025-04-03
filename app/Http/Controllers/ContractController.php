@@ -55,7 +55,7 @@ class ContractController extends Controller
     {
         $myArray = $request->input('internalContacts');
     }
-    
+
     public function employeeContracts()
     {
         return view('employeecontracts');
@@ -64,8 +64,8 @@ class ContractController extends Controller
     public function getEmployeeContracts()
     {
         $query = EmployeeContracts::join('InternalContacts', 'EmployeeContracts.EmployeeContactId', '=', 'InternalContacts.ID')
-        ->select('EmployeeContracts.*', 'InternalContacts.FirstName as FirstName', 'InternalContacts.LastName as LastName')
-        ->get();
+            ->select('EmployeeContracts.*', 'InternalContacts.FirstName as FirstName', 'InternalContacts.LastName as LastName')
+            ->get();
 
         $query->each(function ($contract) {
             $contract->EmployeeName = $contract->FirstName . ' ' . $contract->LastName;
@@ -79,9 +79,9 @@ class ContractController extends Controller
     public function getActiveEmployeeContracts()
     {
         $query = EmployeeContracts::join('InternalContacts', 'EmployeeContracts.EmployeeContactId', '=', 'InternalContacts.ID')
-        ->select('EmployeeContracts.*', 'InternalContacts.FirstName as FirstName', 'InternalContacts.LastName as LastName')
-        ->whereDate('EndDate', '>=', Carbon::today())
-        ->get();
+            ->select('EmployeeContracts.*', 'InternalContacts.FirstName as FirstName', 'InternalContacts.LastName as LastName')
+            ->whereDate('EndDate', '>=', Carbon::today())
+            ->get();
 
         $query->each(function ($contract) {
             $contract->EmployeeName = $contract->FirstName . ' ' . $contract->LastName;
@@ -90,15 +90,14 @@ class ContractController extends Controller
         });
 
         return DataTables::of($query)->make(true);
-
     }
 
     public function getInactiveEmployeeContracts()
     {
         $query = EmployeeContracts::join('InternalContacts', 'EmployeeContracts.EmployeeContactId', '=', 'InternalContacts.ID')
-        ->select('EmployeeContracts.*', 'InternalContacts.FirstName as FirstName', 'InternalContacts.LastName as LastName')
-        ->whereDate('EndDate', '<', Carbon::today())
-        ->get();
+            ->select('EmployeeContracts.*', 'InternalContacts.FirstName as FirstName', 'InternalContacts.LastName as LastName')
+            ->whereDate('EndDate', '<', Carbon::today())
+            ->get();
 
         $query->each(function ($contract) {
             $contract->EmployeeName = $contract->FirstName . ' ' . $contract->LastName;
@@ -107,6 +106,5 @@ class ContractController extends Controller
         });
 
         return DataTables::of($query)->make(true);
-
     }
 }
