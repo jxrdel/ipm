@@ -118,6 +118,7 @@ class ContractController extends Controller
             ->join('MOHRoles', 'EmployeeContracts.MOHRoleId', '=', 'MOHRoles.ID')
             ->select('EmployeeContracts.*', 'InternalContacts.FirstName as FirstName', 'InternalContacts.LastName as LastName', 'BusinessGroups.Name as Unit', 'MOHRoles.Name as Position')
             ->whereDate('EndDate', '>=', Carbon::today())
+            ->orderBy('EndDate', 'asc')
             ->get();
 
         $headers = [
@@ -133,13 +134,16 @@ class ContractController extends Controller
 
             // Add records
             foreach ($records as $record) {
+                $end = Carbon::parse($record->EndDate);
+                $diff = now()->diff($end);
+
                 fputcsv($file, [
                     $record->FirstName . ' ' . $record->LastName,
                     $record->Unit,
                     $record->Position,
                     Carbon::parse($record->StartDate)->format('d/m/Y'),
                     Carbon::parse($record->EndDate)->format('d/m/Y'),
-                    Carbon::now()->diffInMonths($record->EndDate) . ' months ' . Carbon::now()->diffInDays($record->EndDate) . ' days',
+                    Carbon::now()->diffInMonths($record->EndDate) . ' months and ' . $diff->d + 1 . ' days', // +1 to include today
                 ]);
             }
 
