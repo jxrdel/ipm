@@ -86,7 +86,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/getactiveemployeecontracts', [ContractController::class, 'getActiveEmployeeContracts'])->name('getactiveemployeecontracts');
     Route::get('/getinactiveemployeecontracts', [ContractController::class, 'getInactiveEmployeeContracts'])->name('getinactiveemployeecontracts');
 
+    Route::get('/downloadactiveemployeecontracts', [ContractController::class, 'downloadActiveEmployeeContracts'])->name('downloadactiveemployeecontracts');
+
     Route::get('/Notifications', [NotificationsController::class, 'index'])->name('notifications');
     Route::get('/getnotifications', [NotificationsController::class, 'getNotifications'])->name('getnotifications');
-
 });

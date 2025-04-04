@@ -63,6 +63,7 @@ class EditEmployeeContract extends Component
         $this->departments = Departments::all();
         $this->loggedinuser = Auth::user()->internalcontact->ID;
         $this->contract = EmployeeContracts::find($id);
+        // dd($this->contract->role->Name);
         // $this->contract = EmployeeContracts::where('EmployeeContracts.ID', $id)
         //     ->join('InternalContacts', 'EmployeeContracts.EmployeeContactId', '=', 'InternalContacts.ID')
         //     ->join('MOHRoles', 'EmployeeContracts.MOHRoleId', '=', 'MOHRoles.ID')

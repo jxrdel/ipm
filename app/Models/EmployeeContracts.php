@@ -30,15 +30,15 @@ class EmployeeContracts extends Model
         'ManagerContactId',
     ];
 
-    public function internalcontacts()
+    public function employee()
     {
-        return $this->belongsToMany(InternalContacts::class, 'InternalContactEmployeeContracts', 'EmployeeContractId', 'InternalContactId');
+        return $this->belongsTo(InternalContacts::class, 'EmployeeContactId', 'ID');
     }
 
     public function notifications()
     {
         return $this->hasMany(Notifications::class, 'ItemId', 'ID')
-            ->where('TypeId', 2); // Ensure TypeId is 1 for PurchaseContracts
+            ->where('TypeId', 2); // Ensure TypeId is 2 for E,ployee Contracts
     }
 
     public function uploads()
@@ -46,7 +46,18 @@ class EmployeeContracts extends Model
         return $this->hasMany(EmployeeContractUploads::class, 'EmployeeContractID', 'ID');
     }
 
-    public function departments(){
+    public function departments()
+    {
         return $this->belongsToMany(Departments::class, 'EmployeeContractBusinessGroups', 'EmployeeContractId', 'BusinessGroupId');
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Departments::class, 'BusinessGroupId', 'ID');
+    }
+
+    public function role()
+    {
+        return $this->belongsTo(MOHRoles::class, 'MOHRoleId', 'ID');
     }
 }

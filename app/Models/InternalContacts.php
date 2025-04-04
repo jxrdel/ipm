@@ -30,4 +30,9 @@ class InternalContacts extends Model
     {
         return $this->belongsTo(Departments::class, 'DepartmentID', 'ID');
     }
+
+    public function role()
+    {
+        return $this->belongsTo(BusinessGroups::class, 'BusinessGroupId', 'ID');
+    }
 }

@@ -107,4 +107,45 @@ class ContractController extends Controller
 
         return DataTables::of($query)->make(true);
     }
+
+    public function downloadActiveEmployeeContracts()
+    {
+        $now = now();
+        $fileName = "active-contracts-{$now->format('Y-m-d_H-i-s')}.csv";
+
+        $records = EmployeeContracts::join('InternalContacts', 'EmployeeContracts.EmployeeContactId', '=', 'InternalContacts.ID')
+            ->join('BusinessGroups', 'EmployeeContracts.BusinessGroupId', '=', 'BusinessGroups.ID')
+            ->join('MOHRoles', 'EmployeeContracts.MOHRoleId', '=', 'MOHRoles.ID')
+            ->select('EmployeeContracts.*', 'InternalContacts.FirstName as FirstName', 'InternalContacts.LastName as LastName', 'BusinessGroups.Name as Unit', 'MOHRoles.Name as Position')
+            ->whereDate('EndDate', '>=', Carbon::today())
+            ->get();
+
+        $headers = [
+            "Content-Type" => "text/csv",
+            "Content-Disposition" => "attachment; filename=$fileName",
+        ];
+
+        $callback = function () use ($records) {
+            $file = fopen('php://output', 'w');
+
+            // Add CSV header with the specified column names
+            fputcsv($file, ['Employee Name', 'Unit', 'Position', 'Start Date', 'End Date', 'Time Remaining']);
+
+            // Add records
+            foreach ($records as $record) {
+                fputcsv($file, [
+                    $record->FirstName . ' ' . $record->LastName,
+                    $record->Unit,
+                    $record->Position,
+                    Carbon::parse($record->StartDate)->format('d/m/Y'),
+                    Carbon::parse($record->EndDate)->format('d/m/Y'),
+                    Carbon::now()->diffInMonths($record->EndDate) . ' months ' . Carbon::now()->diffInDays($record->EndDate) . ' days',
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
 }
