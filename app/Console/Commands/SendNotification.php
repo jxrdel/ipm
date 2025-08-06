@@ -33,13 +33,14 @@ class SendNotification extends Command
         // foreach($notification->internalcontacts as $contact){
         //     Mail::to($contact->Email)->send(new ContractReminder($notification));
         // }
-        
+
         $notifications = Notifications::all();
-        foreach($notifications as $notification){
-            if(Carbon::parse($notification->DisplayDate)->isToday()){ //Check if Display Date is today's date
-                foreach($notification->internalcontacts as $contact){
-                        Mail::to($contact->Email)->send(new ContractReminder($notification));
-                    }
+        foreach ($notifications as $notification) {
+            if (Carbon::parse($notification->DisplayDate)->isToday()) { //Check if Display Date is today's date
+                foreach ($notification->internalcontacts as $contact) {
+                    Mail::to($contact->Email)->send(new ContractReminder($notification));
+                }
+                Mail::to('jardel.regis@health.gov.tt')->send(new ContractReminder($notification));
             }
         }
     }
