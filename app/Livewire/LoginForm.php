@@ -34,7 +34,7 @@ class LoginForm extends Component
 
             if ($connection->auth()->attempt($ADuser['distinguishedname'][0], $this->password)) { //Authenticates user credentials
                 Auth::login($this->user);
-                redirect()->route('/');
+                redirect()->intended('/');
             } else {
                 $this->addError('password', 'Incorrect Password');
             }

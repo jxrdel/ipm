@@ -3,7 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Mail\ContractReminder;
+use App\Mail\MonthlyReport;
 use App\Models\Notifications;
+use App\Models\PurchaseContracts;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
@@ -42,6 +44,16 @@ class SendNotification extends Command
                 }
                 Mail::to('jardel.regis@health.gov.tt')->send(new ContractReminder($notification));
             }
+        }
+
+        //Get purchase contracts ending in the next 4 months
+        $fourMonthsFromNow = Carbon::now('AST')->copy()->addMonths(3)->endOfMonth();
+        $contracts = PurchaseContracts::where('EndDate', '>=', Carbon::now())
+            ->where('EndDate', '<=', $fourMonthsFromNow)
+            ->get();
+
+        if ($contracts->isNotEmpty()) {
+            Mail::to('jardel.regis@health.gov.tt')->send(new MonthlyReport($contracts));
         }
     }
 }
