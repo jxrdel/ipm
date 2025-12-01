@@ -22,52 +22,35 @@ class MonthlyReport extends Mailable
 
     public function build()
     {
-        $csvData = $this->generateCsvData();
-
-        return $this->subject('Monthly Report - ' . $this->now->format('F'))
-            ->markdown('monthlyreport', [
-                'contracts' => $this->contracts,
-                'startdate' => $this->now->copy()->startOfMonth()->format('F jS, Y'),
-                'enddate' => $this->now->copy()->addMonths(3)->endOfMonth()->format('F jS, Y'),
-                'url' => route('purchasecontracts'),
-            ])
-            ->attachData($csvData, 'contracts' . $this->now->format('Y-m') . '.csv', [
-                'mime' => 'text/csv',
-            ]);
-    }
-
-    protected function generateCsvData()
-    {
-        $headers = ['Name', 'Start Date', 'End Date', 'Cost', 'Time Remaining'];
-        $output = fopen('php://temp', 'r+');
-
-        // Write headers
-        fputcsv($output, $headers);
-
-        // Write contract rows
-        foreach ($this->contracts as $contract) {
+        $contractsWithTimeRemaining = $this->contracts->map(function ($contract) {
             $startDate = $contract->StartDate ? Carbon::parse($contract->StartDate) : null;
             $endDate = $contract->EndDate ? Carbon::parse($contract->EndDate) : null;
 
-            // Calculate time remaining if end date exists
             if ($endDate) {
                 $now = Carbon::now();
                 $diff = $now->diff($endDate);
-                $timeRemaining = $now->diffInMonths($endDate) . ' months and ' . ($diff->d + 1) . ' days'; // +1 to include today
+                $months = $now->diffInMonths($endDate);
+                $days = $diff->d + 1; // include today
+                $timeRemaining = "$months months and $days days";
             } else {
                 $timeRemaining = 'N/A';
             }
 
-            fputcsv($output, [
-                $contract->Name ?? 'N/A',
-                $startDate ? $startDate->format('Y-m-d') : 'N/A',
-                $endDate ? $endDate->format('Y-m-d') : 'N/A',
-                $contract->Cost ?? '0',
-                $timeRemaining,
-            ]);
-        }
+            return (object)[
+                'Name' => $contract->Name ?? 'N/A',
+                'StartDate' => $startDate ? $startDate->format('Y-m-d') : 'N/A',
+                'EndDate' => $endDate ? $endDate->format('Y-m-d') : 'N/A',
+                'Cost' => $contract->Cost ?? '0',
+                'TimeRemaining' => $timeRemaining,
+            ];
+        });
 
-        rewind($output);
-        return stream_get_contents($output);
+        return $this->subject('Monthly Contract Report | ICT Contracts')
+            ->markdown('monthlyreport', [
+                'contracts' => $contractsWithTimeRemaining,
+                'startdate' => $this->now->copy()->startOfMonth()->format('F jS, Y'),
+                'enddate' => $this->now->copy()->addMonths(3)->endOfMonth()->format('F jS, Y'),
+                'url' => route('purchasecontracts'),
+            ]);
     }
 }
