@@ -139,12 +139,12 @@
 
         .leave-vacation-leave {
             background-color: rgba(78, 115, 223, 0.2);
-            color: #1778d3;
+            color: #006fba;
         }
 
         .leave-casual-leave {
-            background-color: rgba(28, 200, 138, 0.2);
-            color: #1cc88a;
+            background-color: rgba(146, 199, 61, 0.2);
+            color: #92c73d;
         }
 
         .leave-bereavement-leave {
@@ -158,12 +158,12 @@
         }
 
         .fc-event.leave-vacation-leave {
-            background-color: #4e73df;
+            background-color: #006fba;
             color: #fff;
         }
 
         .fc-event.leave-casual-leave {
-            background-color: #1cc88a;
+            background-color: #92c73d;
             color: #fff;
         }
 
@@ -337,6 +337,29 @@
 
             // Initialize Chart.js Bar Chart
             var ctx = document.getElementById('leaveBarChart').getContext('2d');
+
+            const leaveTypeColors = {
+                'Sick Leave': '#f6c23e',
+                'Vacation Leave': '#006fba',
+                'Casual Leave': '#92c73d',
+                'Bereavement Leave': '#858796',
+                'Other': '#54a2eb' // Default color for unspecified leave types
+            };
+
+            const backgroundColors = chartLabels.map(label => {
+                const hex = leaveTypeColors[label] || leaveTypeColors['Other'];
+                // Convert hex to rgba for background with transparency
+                const r = parseInt(hex.slice(1, 3), 16);
+                const g = parseInt(hex.slice(3, 5), 16);
+                const b = parseInt(hex.slice(5, 7), 16);
+                return `rgba(${r}, ${g}, ${b}, 0.8)`;
+            });
+
+            const borderColors = chartLabels.map(label => {
+                const hex = leaveTypeColors[label] || leaveTypeColors['Other'];
+                return hex; // Use hex directly for border
+            });
+
             var leaveBarChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -344,20 +367,8 @@
                     datasets: [{
                         label: 'Days Taken (YTD)',
                         data: chartData,
-                        backgroundColor: [
-                            'rgba(246, 194, 62, 0.8)',
-                            'rgba(78, 115, 223, 0.8)',
-                            'rgba(28, 200, 138, 0.8)',
-                            'rgba(133, 135, 150, 0.8)',
-                            'rgba(54, 162, 235, 0.8)'
-                        ],
-                        borderColor: [
-                            'rgba(246, 194, 62, 1)',
-                            'rgba(78, 115, 223, 1)',
-                            'rgba(28, 200, 138, 1)',
-                            'rgba(133, 135, 150, 1)',
-                            'rgba(54, 162, 235, 1)'
-                        ],
+                        backgroundColor: backgroundColors,
+                        borderColor: borderColors,
                         borderWidth: 1
                     }]
                 },
