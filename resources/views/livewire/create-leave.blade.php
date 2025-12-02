@@ -25,7 +25,7 @@
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="internal_contact_id" class="form-label">Employee</label>
-                    <select wire:model="internal_contact_id" id="internal_contact_id" class="form-select">
+                    <select wire:model.live="internal_contact_id" id="internal_contact_id" class="form-select">
                         <option value="">Select an Employee</option>
                         @foreach ($internalContacts as $contact)
                             <option value="{{ $contact->ID }}">{{ $contact->FirstName }} {{ $contact->LastName }}
@@ -73,14 +73,17 @@
                 </div>
             </div>
 
-            @if (!empty($overlappingLeaves))
+            @if (count($overlappingLeaves) > 0)
                 <div class="alert alert-warning mt-3">
-                    <strong>Warning:</strong> There are other employees from the same department on leave during this period:
+                    <strong>Warning:</strong> There are other employees from the same department on leave during this
+                    period:
                     <ul>
                         @foreach ($overlappingLeaves as $leave)
                             <li>
-                                <strong>{{ $leave->internalContact->FirstName }} {{ $leave->internalContact->LastName }}</strong>:
-                                {{ \Carbon\Carbon::parse($leave->start_date)->format('M d, Y') }} - {{ \Carbon\Carbon::parse($leave->end_date)->format('M d, Y') }}
+                                <strong>{{ $leave->internalContact->FirstName }}
+                                    {{ $leave->internalContact->LastName }}</strong>:
+                                {{ \Carbon\Carbon::parse($leave->start_date)->format('M d, Y') }} -
+                                {{ \Carbon\Carbon::parse($leave->end_date)->format('M d, Y') }}
                                 ({{ \App\Enums\LeaveTypeEnum::tryFrom($leave->leave_type)?->getLabel() ?? $leave->leave_type }})
                             </li>
                         @endforeach

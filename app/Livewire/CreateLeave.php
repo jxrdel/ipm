@@ -79,15 +79,15 @@ class CreateLeave extends Component
                     $this->overlappingLeaves = Leave::whereHas('internalContact', function ($query) use ($departmentId) {
                         $query->where('BusinessGroupId', $departmentId);
                     })
-                    ->where(function ($query) use ($startDate, $endDate) {
-                        $query->where(function ($q) use ($startDate, $endDate) {
-                            $q->where('start_date', '<=', $endDate)
-                              ->where('end_date', '>=', $startDate);
-                        });
-                    })
-                    ->where('internal_contact_id', '!=', $this->internal_contact_id)
-                    ->with('internalContact')
-                    ->get();
+                        ->where(function ($query) use ($startDate, $endDate) {
+                            $query->where(function ($q) use ($startDate, $endDate) {
+                                $q->where('start_date', '<=', $endDate)
+                                    ->where('end_date', '>=', $startDate);
+                            });
+                        })
+                        ->where('internal_contact_id', '!=', $this->internal_contact_id)
+                        ->with('internalContact')
+                        ->get();
                 }
             }
         } else {
@@ -117,7 +117,7 @@ class CreateLeave extends Component
 
         session()->flash('success', 'Leave record created successfully.');
 
-        return $this->redirectRoute('leaves', navigate: true);
+        return redirect()->route('leave.index')->with('success', 'Leave record created successfully.');
     }
 
     public function render()

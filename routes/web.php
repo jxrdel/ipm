@@ -77,6 +77,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/Leave', [LeaveController::class, 'index'])->name('leave.index');
     Route::get('/Leave/Create', CreateLeave::class)->name('leave.create');
     Route::get('/getleaves', [LeaveController::class, 'getLeaves'])->name('getleaves');
+    Route::get('/getupcomingleaves', [LeaveController::class, 'getUpcomingLeaves'])->name('getupcomingleaves');
+    Route::get('/getongoingleaves', [LeaveController::class, 'getOngoingLeaves'])->name('getongoingleaves');
 
     Route::get('/PurchaseContracts', [ContractController::class, 'purchaseContracts'])->name('purchasecontracts');
     Route::get('/PurchaseContracts/Create', CreatePurchaseContract::class)->name('purchasecontracts.create');

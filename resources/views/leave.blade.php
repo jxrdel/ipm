@@ -26,6 +26,22 @@
                     <span class="text" style="width: 200px">Add Leave</span>
                 </a>
             </div>
+            <div class="row" style="margin-top: 15px; margin-left: 5px">
+                <div class="col-10"></div>
+                <div class="col" style="text-align:right">
+                    <div class="btn-group" role="group" aria-label="Leave filter button group">
+                        <input type="radio" class="btn-check" name="btnradio" id="btn-upcoming" autocomplete="off"
+                            checked>
+                        <label class="btn btn-outline-primary" for="btn-upcoming">Upcoming</label>
+
+                        <input type="radio" class="btn-check" name="btnradio" id="btn-all" autocomplete="off">
+                        <label class="btn btn-outline-primary" for="btn-all">All</label>
+
+                        <input type="radio" class="btn-check" name="btnradio" id="btn-ongoing" autocomplete="off">
+                        <label class="btn btn-outline-primary" for="btn-ongoing">Ongoing</label>
+                    </div>
+                </div>
+            </div>
             <div class="row" style="margin-top: 30px">
                 <table id="leavetable" class="table table-striped table-bordered">
                     <thead>
@@ -34,7 +50,7 @@
                             <th>Start Date</th>
                             <th>End Date</th>
                             <th>Internal Contact</th>
-                            <th>Days Remaining</th>
+                            <th>Days Taken</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -60,17 +76,18 @@
     @endif
     <script>
         $(document).ready(function() {
-            $('#leavetable').DataTable({
+            var table = $('#leavetable').DataTable({
                 "pageLength": 10,
                 "processing": true,
                 "serverSide": true,
                 "ajax": {
-                    "url": "{{ route('getleaves') }}",
+                    "url": "{{ route('getupcomingleaves') }}",
                     "type": "GET"
                 },
                 "columns": [{
-                        data: 'leave_type',
-                        name: 'leave_type'
+                        data: 'leave_type_label',
+                        name: 'leave_type_label',
+                        searchable: true
                     },
                     {
                         data: 'start_date',
@@ -82,11 +99,12 @@
                     },
                     {
                         data: 'internal_contact_name',
-                        name: 'internalContact.Name'
-                    }, // Assuming InternalContact has a Name field
+                        name: 'internal_contact_name',
+                        searchable: true
+                    },
                     {
-                        data: 'days_remaining',
-                        name: 'days_remaining'
+                        data: 'days_to_be_taken',
+                        name: 'days_to_be_taken'
                     },
                     {
                         data: null,
@@ -99,7 +117,27 @@
                                 ')">Delete</a>';
                         }
                     },
+                ],
+                order: [
+                    [1, 'asc']
                 ]
+            });
+
+            $('.btn-check').change(function() {
+                var selectedOption = $("input[name='btnradio']:checked").attr('id');
+                var newUrl;
+                switch (selectedOption) {
+                    case 'btn-upcoming':
+                        newUrl = '{{ route('getupcomingleaves') }}';
+                        break;
+                    case 'btn-all':
+                        newUrl = '{{ route('getleaves') }}';
+                        break;
+                    case 'btn-ongoing':
+                        newUrl = '{{ route('getongoingleaves') }}';
+                        break;
+                }
+                table.ajax.url(newUrl).load();
             });
         });
 
