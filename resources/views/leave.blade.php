@@ -278,18 +278,18 @@
     </div>
 
     <!-- Main Calendar -->
-    <div class="row">
+    <div class="row mb-4">
         <div class="col-12">
             <div id='leaveCalendar'></div>
         </div>
     </div>
 
     <!-- Analytics Section -->
-    <div class="row mt-4">
+    {{-- <div class="row mt-4">
         <!-- Leave Type Stats -->
         <div class="card h-100">
             <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                <h6 class="m-0 font-weight-bold text-primary">Leave Type Statistics (YTD)</h6>
+                <h6 class="m-0 font-weight-bold text-primary">Leave Type Statistics (Amount of Days Taken this Year)</h6>
             </div>
             <div class="card-body">
                 <div class="chart-container" style="position: relative; height:250px;">
@@ -297,7 +297,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
 @endsection
 
 @section('scripts')

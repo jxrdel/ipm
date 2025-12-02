@@ -1,166 +1,334 @@
 @extends('layout')
 
 @section('title')
-    <title>IPM | Dashboard</title>
+    <title>IPM | Contracts Dashboard</title>
+@endsection
+
+@section('styles')
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            background: #f5f7fb;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        /* Page Header */
+        .page-title {
+            font-weight: 800;
+            color: #36454f;
+        }
+
+        .page-subtitle {
+            font-size: 0.95rem;
+            color: #6c7785;
+        }
+
+        /* Cards */
+        .card {
+            border: none;
+            border-radius: 1rem;
+            background: #ffffff;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+            transition: 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 26px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-header {
+            background: transparent;
+            border-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        /* Widget Metric Cards */
+        .metric-card .metric-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #36454f;
+        }
+
+        .metric-card .metric-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: #6c7785;
+            letter-spacing: 0.5px;
+        }
+
+        .icon-box {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.5rem;
+        }
+
+        /* Badges */
+        .badge-soft {
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-danger-soft {
+            background: #fde3e3;
+            color: #d9534f;
+        }
+
+        .badge-warning-soft {
+            background: #fff4d6;
+            color: #f0ad4e;
+        }
+
+        .badge-success-soft {
+            background: #dbf6e9;
+            color: #28a745;
+        }
+
+        /* Table */
+        .table thead {
+            background: #f2f4f8;
+        }
+
+        .table th {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: #6c7785;
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        .status-urgent {
+            background: #fde2e0;
+            color: #d9534f;
+        }
+
+        .status-nearing {
+            background: #fff2cd;
+            color: #f0ad4e;
+        }
+
+        .status-far-out {
+            background: #dcf5ea;
+            color: #1cc88a;
+        }
+    </style>
 @endsection
 
 @section('content')
-    
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="page-title">Contracts Dashboard</h1>
+            <p class="page-subtitle">Overview of employee and purchase contracts ending this year.</p>
+        </div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                <li class="breadcrumb-item active">Contracts</li>
+            </ol>
+        </nav>
+    </div>
 
-        <!-- Page Heading -->
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+
+    <!-- Metric Widgets -->
+    <div class="row g-4">
+
+        <!-- 4 Month Warning -->
+        <div class="col-xl-4 col-md-6">
+            <div class="card metric-card p-3 d-flex flex-row align-items-center justify-content-between">
+                <div>
+                    <div class="metric-label">Ending in 4 Months</div>
+                    <div class="metric-value">{{ $contractsEndingSoon }}</div>
+                </div>
+                <div class="icon-box bg-warning"><i class="bi bi-exclamation-triangle-fill"></i></div>
+            </div>
         </div>
 
-        <!-- Content Row -->
+        <!-- Employee Contracts -->
+        <div class="col-xl-2 col-md-6">
+            <div class="card metric-card p-3 d-flex flex-row align-items-center justify-content-between">
+                <div>
+                    <div class="metric-label">Employee</div>
+                    <div class="metric-value">{{ $employeeContractsEndingThisYear }}</div>
+                </div>
+                <div class="icon-box bg-success"><i class="bi bi-person-fill"></i></div>
+            </div>
+        </div>
 
-        <div class="row">
+        <!-- Purchase Contracts -->
+        <div class="col-xl-2 col-md-6">
+            <div class="card metric-card p-3 d-flex flex-row align-items-center justify-content-between">
+                <div>
+                    <div class="metric-label">Purchase</div>
+                    <div class="metric-value">{{ $purchaseContractsEndingThisYear }}</div>
+                </div>
+                <div class="icon-box bg-primary"><i class="bi bi-briefcase-fill"></i></div>
+            </div>
+        </div>
 
-            <!-- Area Chart -->
-            <div class=""><!-- Bar Chart -->
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Contracts ending in {{ date('Y') }}</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-bar">
-                            <canvas id="myBarChart"></canvas>
+        <!-- Expiring This Month -->
+        <div class="col-xl-4 col-md-12">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h6 class="fw-bold text-danger">Expiring This Month</h6>
+                </div>
+                <div class="card-body">
+                    @forelse ($contractsExpiringThisMonth as $contract)
+                        <div class="d-flex justify-content-between mb-3 pb-2 border-bottom">
+                            <div>
+                                <div class="fw-bold text-dark">{{ $contract->Name }}</div>
+                                <div class="small text-muted">{{ $contract->type }}</div>
+                            </div>
+                            <span class="badge badge-danger-soft">
+                                {{ \Carbon\Carbon::parse($contract->EndDate)->format('M d') }}
+                            </span>
                         </div>
-                        {{-- <hr>
-                        Styling for the bar chart can be found in the
-                        <code>/js/demo/chart-bar-demo.js</code> file. --}}
-                    </div>
+                    @empty
+                        <p class="text-muted text-center">No contracts expiring this month.</p>
+                    @endforelse
                 </div>
             </div>
         </div>
 
+    </div>
+
+    <!-- Chart + Table -->
+    <div class="row g-4 mt-1">
+
+        <!-- Bar Chart -->
+        <div class="col-xl-7">
+            <div class="card p-3">
+                <div class="card-header">
+                    <h6 class="fw-bold text-primary">Contract Expiry by Month ({{ date('Y') }})</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="expiryBarChart" style="height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Expirations Table -->
+        <div class="col-xl-5">
+            <div class="card p-3">
+                <div class="card-header">
+                    <h6 class="fw-bold text-primary">Upcoming Expirations</h6>
+                </div>
+
+                <div class="table-responsive mt-2">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Contract</th>
+                                <th>Type</th>
+                                <th>End Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($upcomingExpirationsTable as $contract)
+                                @php
+                                    $endDate = \Carbon\Carbon::parse($contract->EndDate);
+                                    $daysUntil = now()->diffInDays($endDate, false);
+
+                                    $status = $daysUntil < 30 ? 'urgent' : ($daysUntil < 90 ? 'nearing' : 'far-out');
+                                @endphp
+                                <tr>
+                                    <td>
+                                        <strong>{{ $contract->Name }}</strong>
+                                        <div class="small text-muted">
+                                            {{ $contract->type === 'Employee' ? $contract->internalcontact->FirstName . ' ' . $contract->internalcontact->LastName : '' }}
+                                        </div>
+                                    </td>
+                                    <td>{{ $contract->type }}</td>
+                                    <td>{{ $endDate->format('d M, Y') }}</td>
+                                    <td>
+                                        <span class="status-badge status-{{ $status }}">
+                                            {{ ucfirst(str_replace('-', ' ', $status)) }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted p-4">
+                                        No upcoming contract expirations this year.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
 @endsection
 
+
 @section('scripts')
-    <!-- Page level plugins -->
-    <script src="{{ asset('js/vendor/chart.js/Chart.min.js') }}"></script>
-
-    <!-- Page level custom scripts -->
     <script>
-                    // Set new default font family and font color to mimic Bootstrap's default styling
-            Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
-            Chart.defaults.global.defaultFontColor = '#858796';
+        document.addEventListener("DOMContentLoaded", () => {
+            const employeeData = {{ Js::from(array_values($employeeContractCounts)) }};
+            const purchaseData = {{ Js::from(array_values($purchaseContractCounts)) }};
+            const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-            function number_format(number, decimals, dec_point, thousands_sep) {
-            // *     example: number_format(1234.56, 2, ',', ' ');
-            // *     return: '1 234,56'
-            number = (number + '').replace(',', '').replace(' ', '');
-            var n = !isFinite(+number) ? 0 : +number,
-                prec = !isFinite(+decimals) ? 0 : Math.abs(decimals),
-                sep = (typeof thousands_sep === 'undefined') ? ',' : thousands_sep,
-                dec = (typeof dec_point === 'undefined') ? '.' : dec_point,
-                s = '',
-                toFixedFix = function(n, prec) {
-                var k = Math.pow(10, prec);
-                return '' + Math.round(n * k) / k;
-                };
-            // Fix for IE parseFloat(0.55).toFixed(0) = 0;
-            s = (prec ? toFixedFix(n, prec) : '' + Math.round(n)).split('.');
-            if (s[0].length > 3) {
-                s[0] = s[0].replace(/\B(?=(?:\d{3})+(?!\d))/g, sep);
-            }
-            if ((s[1] || '').length < prec) {
-                s[1] = s[1] || '';
-                s[1] += new Array(prec - s[1].length + 1).join('0');
-            }
-            return s.join(dec);
-            }
-
-            // Bar Chart Example
-            var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-            
-            console.log({!! json_encode(array_map('intval', array_values($purchaseContractCount))) !!});
-            
-            var ctx = document.getElementById("myBarChart");
-            var myBarChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                // labels: {!! json_encode(array_keys($employeeContractCount)) !!}.map(function(month) {
-                //     return monthNames[month - 1];
-                labels: monthNames,
-                datasets: [{
-                    label: "Purchase Contracts",
-                    backgroundColor: "#4e73df",
-                    hoverBackgroundColor: "#2e59d9",
-                    borderColor: "#4e73df",
-                    data: {!! json_encode(array_values($purchaseContractCount)) !!},
-                    // data: [54, 23, 87, 42, 69, 11, 35, 76, 93, 18, 62, 84],
-                    },
-                    {
-                    label: "Employee Contracts",
-                    backgroundColor: "#1cc88a",
-                    hoverBackgroundColor: "#18b57c",
-                    borderColor: "#1cc88a",
-                    data: {!! json_encode(array_values($employeeContractCount)) !!},
-                    }
-                ],
-            },
-            
-            options: {
-                maintainAspectRatio: false,
-                layout: {
-                padding: {
-                    left: 10,
-                    right: 25,
-                    top: 25,
-                    bottom: 0
-                }
+            new Chart(document.getElementById('expiryBarChart'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                            label: "Employee Contracts",
+                            data: employeeData,
+                            backgroundColor: "rgba(40, 167, 69, 0.7)",
+                            borderColor: "rgba(40, 167, 69, 1)",
+                            borderRadius: 6,
+                        },
+                        {
+                            label: "Purchase Contracts",
+                            data: purchaseData,
+                            backgroundColor: "rgba(0, 123, 255, 0.7)",
+                            borderColor: "rgba(0, 123, 255, 1)",
+                            borderRadius: 6,
+                        }
+                    ]
                 },
-                scales: {
-                xAxes: [{
-                    time: {
-                    unit: 'month'
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#e6e8ef'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
                     },
-                    gridLines: {
-                    display: false,
-                    drawBorder: false
-                    },
-                }],
-                yAxes: [{
-                    ticks: {
-                    min: 0,
-                    stepSize: 1,
-                    precision: 0,
-                    padding: 10,
-                    },
-                    gridLines: {
-                    color: "rgb(234, 236, 244)",
-                    zeroLineColor: "rgb(234, 236, 244)",
-                    drawBorder: false,
-                    borderDash: [2],
-                    zeroLineBorderDash: [2]
-                    }
-                }],
-                },
-                legend: {
-                display: true
-                },
-                tooltips: {
-                titleMarginBottom: 10,
-                titleFontColor: '#6e707e',
-                titleFontSize: 14,
-                backgroundColor: "rgb(255,255,255)",
-                bodyFontColor: "#858796",
-                borderColor: '#dddfeb',
-                borderWidth: 1,
-                xPadding: 15,
-                yPadding: 15,
-                displayColors: false,
-                caretPadding: 10,
-                callbacks: {
-                    label: function(tooltipItem, chart) {
-                    var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
-                    return datasetLabel + ' ending: ' + number_format(tooltipItem.yLabel);
+                    plugins: {
+                        legend: {
+                            position: "bottom"
+                        }
                     }
                 }
-                },
-            }
             });
-
+        });
     </script>
 @endsection

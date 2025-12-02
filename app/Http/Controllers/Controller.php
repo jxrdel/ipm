@@ -9,6 +9,7 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class Controller extends BaseController
 {
@@ -16,33 +17,89 @@ class Controller extends BaseController
 
     public function index()
     {
-        $employeeContractCount = array_fill_keys(range(1, 12), 0);
-        $purchaseContractCount = array_fill_keys(range(1, 12), 0);
+        $today = Carbon::today();
+        $thisYear = $today->year;
 
-        $employeeContracts = EmployeeContracts::selectRaw('MONTH(EndDate) as month, count(*) as count')
-            ->whereYear('EndDate', '=', date('Y'))
+        // Data for widgets
+        $contractsEndingSoon = EmployeeContracts::where('EndDate', '>=', $today)->where('EndDate', '<=', $today->copy()->addMonths(4))->count()
+                             + PurchaseContracts::where('EndDate', '>=', '2025-12-03 00:00:00.000')->where('EndDate', '<=', $today->copy()->addMonths(4))->count();
+
+        $employeeContractsEndingThisYear = EmployeeContracts::whereYear('EndDate', $thisYear)->count();
+        $purchaseContractsEndingThisYear = PurchaseContracts::whereYear('EndDate', $thisYear)->count();
+
+        $contractsExpiringThisMonth = EmployeeContracts::with('internalcontact')
+            ->whereYear('EndDate', $thisYear)
+            ->whereMonth('EndDate', $today->month)
+            ->get()
+            ->map(function ($contract) {
+                $contract->type = 'Employee';
+                return $contract;
+            })
+            ->concat(
+                PurchaseContracts::with('internalcontact')
+                    ->whereYear('EndDate', $thisYear)
+                    ->whereMonth('EndDate', $today->month)
+                    ->get()
+                    ->map(function ($contract) {
+                        $contract->type = 'Purchase';
+                        return $contract;
+                    })
+            );
+
+        // Data for Bar Chart
+        $employeeContractCounts = array_fill(1, 12, 0);
+        $purchaseContractCounts = array_fill(1, 12, 0);
+
+        $employeeContractsByMonth = EmployeeContracts::selectRaw('MONTH(EndDate) as month, count(*) as count')
+            ->whereYear('EndDate', $thisYear)
             ->groupBy(DB::raw('MONTH(EndDate)'))
-            ->orderBy(DB::raw('MONTH(EndDate)'))
             ->pluck('count', 'month')
-            ->toArray();
+            ->all();
 
-        foreach ($employeeContracts as $month => $count) {
-            $employeeContractCount[$month] = $count;
+        $purchaseContractsByMonth = PurchaseContracts::selectRaw('MONTH(EndDate) as month, count(*) as count')
+            ->whereYear('EndDate', $thisYear)
+            ->groupBy(DB::raw('MONTH(EndDate)'))
+            ->pluck('count', 'month')
+            ->all();
+
+        foreach ($employeeContractsByMonth as $month => $count) {
+            $employeeContractCounts[$month] = $count;
+        }
+        foreach ($purchaseContractsByMonth as $month => $count) {
+            $purchaseContractCounts[$month] = $count;
         }
 
-        $purchaseContracts = PurchaseContracts::selectRaw('MONTH(EndDate) as month, count(*) as count')
-            ->whereYear('EndDate', '=', date('Y'))
-            ->groupBy(DB::raw('MONTH(EndDate)'))
-            ->orderBy(DB::raw('MONTH(EndDate)'))
-            ->pluck('count', 'month')
-            ->toArray();
+        // Data for Table
+        $upcomingExpirationsTable = EmployeeContracts::with('internalcontact')
+            ->where('EndDate', '>=', $today)
+            ->whereYear('EndDate', $thisYear)
+            ->get()
+            ->map(function ($contract) {
+                $contract->type = 'Employee';
+                return $contract;
+            })
+            ->concat(
+                PurchaseContracts::with('internalcontact')
+                    ->where('EndDate', '>=', $today)
+                    ->whereYear('EndDate', $thisYear)
+                    ->get()
+                    ->map(function ($contract) {
+                        $contract->type = 'Purchase';
+                        return $contract;
+                    })
+            )
+            ->sortBy('EndDate');
 
 
-        foreach ($purchaseContracts as $month => $count) {
-            $purchaseContractCount[$month] = $count;
-        }
-            // dump($purchaseContracts);
-        return view('home', compact('employeeContractCount', 'purchaseContractCount'));
+        return view('home', [
+            'contractsEndingSoon' => $contractsEndingSoon,
+            'employeeContractsEndingThisYear' => $employeeContractsEndingThisYear,
+            'purchaseContractsEndingThisYear' => $purchaseContractsEndingThisYear,
+            'contractsExpiringThisMonth' => $contractsExpiringThisMonth,
+            'employeeContractCounts' => $employeeContractCounts,
+            'purchaseContractCounts' => $purchaseContractCounts,
+            'upcomingExpirationsTable' => $upcomingExpirationsTable
+        ]);
     }
 
     public function login(){
