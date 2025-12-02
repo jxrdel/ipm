@@ -1,184 +1,380 @@
 @extends('layout')
 
 @section('title')
-    <title>IPM | Leave Management</title>
+    <title>IPM | Leave Dashboard</title>
 @endsection
 
 @section('styles')
-    <link href="{{ asset('js/vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
+    {{-- FullCalendar and Chart.js for modern dashboard elements --}}
+    <link href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css' rel='stylesheet'>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --bs-primary-rgb: 78, 115, 223;
+            --bs-secondary-rgb: 133, 135, 150;
+            --fc-border-color: #e3e6f0;
+            --fc-daygrid-event-dot-width: 8px;
+        }
+
+        body {
+            background-color: #f8f9fc;
+            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        .breadcrumb {
+            background-color: transparent;
+            padding: 0;
+            margin-bottom: .5rem;
+        }
+
+        .breadcrumb-item a {
+            color: #858796;
+            text-decoration: none;
+        }
+
+        .breadcrumb-item.active {
+            color: #5a5c69;
+            font-weight: 500;
+        }
+
+        .card {
+            border: none;
+            border-radius: 0.75rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header,
+        .card-footer {
+            background-color: #fff;
+            border-bottom: 1px solid #e3e6f0;
+        }
+
+        .fc {
+            background-color: #fff;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+
+        .fc .fc-toolbar-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #5a5c69;
+        }
+
+        .fc .fc-button-primary {
+            background-color: #4e73df;
+            border-color: #4e73df;
+            transition: all 0.2s;
+        }
+
+        .fc .fc-button-primary:hover {
+            background-color: #2e59d9;
+            border-color: #2653b4;
+        }
+
+        .fc-event {
+            border: none !important;
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border-radius: 0.35rem;
+        }
+
+        .fc-event-main-frame:hover {
+            cursor: pointer;
+        }
+
+        .widget-card .card-body {
+            display: flex;
+            align-items: center;
+        }
+
+        .widget-card .icon-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+        }
+
+        .widget-card .text-xs {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .widget-card .h5 {
+            font-weight: 700;
+        }
+
+        .upcoming-leave-list .leave-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            padding: 0.4rem 0;
+            border-bottom: 1px solid #e3e6f0;
+        }
+
+        .upcoming-leave-list .leave-item:last-child {
+            border-bottom: none;
+        }
+
+        .leave-type-badge {
+            font-size: 0.7rem;
+            padding: 0.25em 0.6em;
+        }
+
+        /* Leave Type Colors */
+        .leave-sick-leave {
+            background-color: rgba(246, 194, 62, 0.2);
+            color: #c08000;
+        }
+
+        .leave-vacation-leave {
+            background-color: rgba(78, 115, 223, 0.2);
+            color: #1778d3;
+        }
+
+        .leave-casual-leave {
+            background-color: rgba(28, 200, 138, 0.2);
+            color: #1cc88a;
+        }
+
+        .leave-bereavement-leave {
+            background-color: rgba(133, 135, 150, 0.2);
+            color: #858796;
+        }
+
+        .fc-event.leave-sick-leave {
+            background-color: #f6c23e;
+            color: #fff;
+        }
+
+        .fc-event.leave-vacation-leave {
+            background-color: #4e73df;
+            color: #fff;
+        }
+
+        .fc-event.leave-casual-leave {
+            background-color: #1cc88a;
+            color: #fff;
+        }
+
+        .fc-event.leave-bereavement-leave {
+            background-color: #858796;
+            color: #fff;
+        }
+    </style>
 @endsection
 
 @section('content')
-    @include('access-denied')
-
-    <!-- Page Heading -->
+    <!-- Header -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Leave Management</h1>
+        <div>
+            <h1 class="h3 mb-1 text-gray-800">Leave Management Dashboard</h1>
+            <p class="mb-0 text-gray-600">View and manage employee leave across the department.</p>
+        </div>
     </div>
 
-    <div class="card">
-        <div class="card-body">
-            <div class="row" style="margin-left: 5px">
-                <a href="{{ route('leave.create') }}" class="btn btn-primary btn-icon-split" style="width: 12rem">
-                    <span class="icon text-white-50">
-                        <i class="fas fa-plus" style="color: white"></i>
-                    </span>
-                    <span class="text" style="width: 200px">Add Leave</span>
-                </a>
-            </div>
-            <div class="row" style="margin-top: 15px; margin-left: 5px">
-                <div class="col-10"></div>
-                <div class="col" style="text-align:right">
-                    <div class="btn-group" role="group" aria-label="Leave filter button group">
-                        <input type="radio" class="btn-check" name="btnradio" id="btn-upcoming" autocomplete="off"
-                            checked>
-                        <label class="btn btn-outline-primary" for="btn-upcoming">Upcoming</label>
+    <div class="row mb-3" style="margin-left: 5px">
+        <a href="{{ route('leave.create') }}" class="btn btn-primary btn-icon-split" style="width: 12rem">
+            <span class="icon text-white-50">
+                <i class="fas fa-plus" style="color: white"></i>
+            </span>
+            <span class="text" style="width: 200px">Add Leave</span>
+        </a>
+    </div>
 
-                        <input type="radio" class="btn-check" name="btnradio" id="btn-all" autocomplete="off">
-                        <label class="btn btn-outline-primary" for="btn-all">All</label>
-
-                        <input type="radio" class="btn-check" name="btnradio" id="btn-ongoing" autocomplete="off">
-                        <label class="btn btn-outline-primary" for="btn-ongoing">Ongoing</label>
+    <!-- Widgets Row -->
+    <div class="row">
+        <!-- Upcoming Leave -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body widget-card">
+                    <div class="icon-circle bg-primary text-white"><i class="bi bi-calendar-event fs-5"></i></div>
+                    <div class="flex-grow-1">
+                        <div class="text-xs text-primary">Upcoming Leave (Next 30 Days)</div>
+                        <div class="h5 mb-0">{{ $upcomingLeaves->count() }} Employees</div>
+                    </div>
+                </div>
+                <div class="card-footer py-2 px-3">
+                    <div class="upcoming-leave-list">
+                        @forelse($upcomingLeaves as $leave)
+                            <div class="leave-item">
+                                <span>{{ $leave->internalContact->FirstName }}
+                                    {{ $leave->internalContact->LastName }}</span>
+                                <span>{{ \Carbon\Carbon::parse($leave->start_date)->format('M d') }} -
+                                    {{ \Carbon\Carbon::parse($leave->end_date)->format('M d') }}
+                                    <span
+                                        class="badge leave-{{ strtolower(str_replace(' ', '-', \App\Enums\LeaveTypeEnum::tryFrom($leave->leave_type)?->getLabel() ?? '')) }}">{{ \App\Enums\LeaveTypeEnum::tryFrom($leave->leave_type)?->getLabel() }}</span>
+                                </span>
+                            </div>
+                        @empty
+                            <div class="text-center text-muted small p-3">No upcoming leave.</div>
+                        @endforelse
                     </div>
                 </div>
             </div>
-            <div class="row" style="margin-top: 30px">
-                <table id="leavetable" class="table table-striped table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Leave Type</th>
-                            <th>Start Date</th>
-                            <th>End Date</th>
-                            <th>Internal Contact</th>
-                            <th>Days Taken</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
+        </div>
+
+        <!-- On Leave Today -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body widget-card">
+                    <div class="icon-circle bg-success text-white"><i class="bi bi-person-check-fill fs-5"></i></div>
+                    <div class="flex-grow-1">
+                        <div class="text-xs text-success">On Leave Today</div>
+                        <div class="h5 mb-0">{{ $ongoingLeaves->count() }} Employees</div>
+                    </div>
+                </div>
+                <div class="card-footer py-2 px-3">
+                    <div class="upcoming-leave-list">
+                        @forelse($ongoingLeaves as $leave)
+                            <div class="leave-item">
+                                <span>{{ $leave->internalContact->FirstName }} {{ $leave->internalContact->LastName }}
+                                    <span class="badge bg-success small">Ongoing</span></span>
+                                <span
+                                    class="badge leave-{{ strtolower(str_replace(' ', '-', \App\Enums\LeaveTypeEnum::tryFrom($leave->leave_type)?->getLabel() ?? '')) }}">{{ \App\Enums\LeaveTypeEnum::tryFrom($leave->leave_type)?->getLabel() }}</span>
+                            </div>
+                        @empty
+                            <div class="text-center text-muted small p-3">No employees on leave today.</div>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leave Summary -->
+        <div class="col-xl-4 col-md-12 mb-4">
+            <div class="card h-100">
+                <div class="card-body widget-card">
+                    <div class="icon-circle bg-info text-white"><i class="bi bi-pie-chart-fill fs-5"></i></div>
+                    <div class="flex-grow-1">
+                        <div class="text-xs text-info">Leave Summary (This Month)</div>
+                        <div class="h5 mb-0">{{ $totalApplicationsMonth }} Applications</div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-around text-center">
+                    <div>
+                        <div class="small text-muted">Total On Leave</div>
+                        <div class="fw-bold">{{ $ongoingLeaves->count() }}</div>
+                    </div>
+                    <div class="vr"></div>
+                    <div>
+                        <div class="small text-muted">Most Common</div>
+                        <div class="fw-bold">
+                            {{ \App\Enums\LeaveTypeEnum::tryFrom($mostCommonLeaveType)?->getLabel() ?? 'N/A' }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Calendar -->
+    <div class="row">
+        <div class="col-12">
+            <div id='leaveCalendar'></div>
+        </div>
+    </div>
+
+    <!-- Analytics Section -->
+    <div class="row mt-4">
+        <!-- Leave Type Stats -->
+        <div class="card h-100">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Leave Type Statistics (YTD)</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="position: relative; height:250px;">
+                    <canvas id="leaveBarChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
 @endsection
 
 @section('scripts')
-    @if (Session::has('success'))
-        <script>
-            toastr.options = {
-                "progressBar": true,
-                "closeButton": true,
-            }
-            toastr.success("{{ Session::get('success') }}", '', {
-                timeOut: 3000
-            });
-        </script>
-    @endif
     <script>
-        $(document).ready(function() {
-            var table = $('#leavetable').DataTable({
-                "pageLength": 10,
-                "processing": true,
-                "serverSide": true,
-                "ajax": {
-                    "url": "{{ route('getupcomingleaves') }}",
-                    "type": "GET"
+        document.addEventListener('DOMContentLoaded', function() {
+            // Data from Controller
+            const leaveEvents = {!! json_encode($calendarEvents) !!};
+            const chartLabels = {{ Js::from($leaveTypeStats->keys()) }};
+            const chartData = {{ Js::from($leaveTypeStats->values()) }};
+
+            // Initialize FullCalendar
+            var calendarEl = document.getElementById('leaveCalendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,listWeek'
                 },
-                "columns": [{
-                        data: 'leave_type_label',
-                        name: 'leave_type_label',
-                        searchable: true
-                    },
-                    {
-                        data: 'start_date',
-                        name: 'start_date'
-                    },
-                    {
-                        data: 'end_date',
-                        name: 'end_date'
-                    },
-                    {
-                        data: 'internal_contact_name',
-                        name: 'internal_contact_name',
-                        searchable: true
-                    },
-                    {
-                        data: 'days_to_be_taken',
-                        name: 'days_to_be_taken'
-                    },
-                    {
-                        data: null,
-                        orderable: false,
-                        searchable: false,
-                        render: function(data, type, row) {
-                            return '<a href="#" onclick="showView(' + data.id +
-                                ')">View</a> | <a href="#" onclick="showEdit(' + data.id +
-                                ')">Edit</a> | <a href="#" onclick="showDelete(' + data.id +
-                                ')">Delete</a>';
+                events: leaveEvents,
+                eventDidMount: function(info) {
+                    // Tooltip on hover
+                    var tooltip = new bootstrap.Tooltip(info.el, {
+                        title: `<strong>${info.event.title}</strong><br>
+                        ${info.event.extendedProps.type}<br>
+                        ${info.event.start.toLocaleDateString()} - ${info.event.end ? new Date(info.event.end.getTime() - 1).toLocaleDateString() : info.event.start.toLocaleDateString()}`,
+                        placement: 'top',
+                        trigger: 'hover',
+                        container: 'body',
+                        html: true
+                    });
+                },
+                height: 650,
+                contentHeight: 600,
+            });
+            calendar.render();
+
+            // Initialize Chart.js Bar Chart
+            var ctx = document.getElementById('leaveBarChart').getContext('2d');
+            var leaveBarChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: 'Days Taken (YTD)',
+                        data: chartData,
+                        backgroundColor: [
+                            'rgba(246, 194, 62, 0.8)',
+                            'rgba(78, 115, 223, 0.8)',
+                            'rgba(28, 200, 138, 0.8)',
+                            'rgba(133, 135, 150, 0.8)',
+                            'rgba(54, 162, 235, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(246, 194, 62, 1)',
+                            'rgba(78, 115, 223, 1)',
+                            'rgba(28, 200, 138, 1)',
+                            'rgba(133, 135, 150, 1)',
+                            'rgba(54, 162, 235, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
                         }
                     },
-                ],
-                order: [
-                    [1, 'asc']
-                ]
-            });
-
-            $('.btn-check').change(function() {
-                var selectedOption = $("input[name='btnradio']:checked").attr('id');
-                var newUrl;
-                switch (selectedOption) {
-                    case 'btn-upcoming':
-                        newUrl = '{{ route('getupcomingleaves') }}';
-                        break;
-                    case 'btn-all':
-                        newUrl = '{{ route('getleaves') }}';
-                        break;
-                    case 'btn-ongoing':
-                        newUrl = '{{ route('getongoingleaves') }}';
-                        break;
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
                 }
-                table.ajax.url(newUrl).load();
             });
-        });
-
-
-        window.addEventListener('refresh-table', event => {
-            $('#leavetable').DataTable().ajax.reload();
-        })
-
-        // Removed Livewire modal functions related to purchases, these will be added when requested for leaves.
-        // function showView(id) {
-        //     Livewire.dispatch('show-viewleave-modal', { id: id });
-        // }
-
-        // function showEdit(id) {
-        //     var hasPermission = "{{ auth()->user()->hasPermission('Leave : Edit : Screen') ?? '' }}";
-        //     if (hasPermission == 1){
-        //         Livewire.dispatch('show-editleave-modal', { id: id });
-        //     } else {
-        //         $('#deniedModal').modal('show');
-        //     }
-        // }
-
-        // function showDelete(id) {
-        //     var hasPermission = "{{ auth()->user()->hasPermission('Leave : Delete : Screen') ?? '' }}";
-        //     if (hasPermission == 1){
-        //         $('#deniedModal').modal('show');
-        //     } else {
-        //         $('#deniedModal').modal('show');
-        //     }
-        // }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Get the paragraph element by its ID
-            var activelink = document.getElementById('leavelink');
-            var activeicon = document.getElementById('leaveicon');
-
-            // Set the fontWeight property to 'bold'
-            if (activelink) activelink.style.color = 'white';
-            if (activelink) activelink.style.fontWeight = 'bold';
-            if (activeicon) activeicon.style.color = 'white';
         });
     </script>
-    {{-- Removed Livewire modal event listeners related to purchases, these will be added when requested for leaves. --}}
 @endsection
