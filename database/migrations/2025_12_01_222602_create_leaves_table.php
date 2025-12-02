@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('leaves', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
+            $table->string('leave_type');
+            $table->date('start_date');
+            $table->date('end_date');
+            $table->unsignedInteger('internal_contact_id');
+            $table->foreign('internal_contact_id')->references('ID')->on('InternalContacts');
+            $table->integer('days_remaining');
             $table->timestamps();
         });
     }
@@ -27,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('leaves');
     }
 };

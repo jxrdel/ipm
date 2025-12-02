@@ -28,11 +28,11 @@ class InternalContacts extends Model
 
     public function department()
     {
-        return $this->belongsTo(Departments::class, 'DepartmentID', 'ID');
+        return $this->belongsTo(BusinessGroups::class, 'BusinessGroupId', 'ID');
     }
 
     public function role()
     {
-        return $this->belongsTo(BusinessGroups::class, 'BusinessGroupId', 'ID');
+        return $this->belongsTo(MOHRoles::class, 'MOHRoleId', 'ID');
     }
 }

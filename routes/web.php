@@ -6,10 +6,12 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ExternalCompanyController;
 use App\Http\Controllers\ExternalPersonController;
 use App\Http\Controllers\InternalContactController;
+use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\MOHPositionsController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\UserController;
+use App\Livewire\CreateLeave;
 use App\Livewire\CreateEmployeeContract;
 use App\Livewire\CreatePurchaseContract;
 use App\Livewire\CreatePurchaseContractModal;
@@ -71,6 +73,10 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/Purchases', [PurchaseController::class, 'index'])->name('purchases');
     Route::get('/getpurchases', [PurchaseController::class, 'getPurchases'])->name('getpurchases');
+
+    Route::get('/Leave', [LeaveController::class, 'index'])->name('leave.index');
+    Route::get('/Leave/Create', CreateLeave::class)->name('leave.create');
+    Route::get('/getleaves', [LeaveController::class, 'getLeaves'])->name('getleaves');
 
     Route::get('/PurchaseContracts', [ContractController::class, 'purchaseContracts'])->name('purchasecontracts');
     Route::get('/PurchaseContracts/Create', CreatePurchaseContract::class)->name('purchasecontracts.create');
