@@ -219,35 +219,41 @@
                                 <th>Contract</th>
                                 <th>Type</th>
                                 <th>End Date</th>
-                                <th>Status</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse ($upcomingExpirationsTable as $contract)
                                 @php
                                     $endDate = \Carbon\Carbon::parse($contract->EndDate);
-                                    $daysUntil = now()->diffInDays($endDate, false);
-
-                                    $status = $daysUntil < 30 ? 'urgent' : ($daysUntil < 90 ? 'nearing' : 'far-out');
                                 @endphp
                                 <tr>
                                     <td>
                                         <strong>{{ $contract->Name }}</strong>
-                                        <div class="small text-muted">
+                                        <div>
                                             {{ $contract->type === 'Employee' ? $contract->employee->FirstName . ' ' . $contract->employee->LastName : '' }}
                                         </div>
                                     </td>
                                     <td>{{ $contract->type }}</td>
                                     <td>{{ $endDate->format('d M, Y') }}</td>
                                     <td>
-                                        <span class="status-badge status-{{ $status }}">
-                                            {{ ucfirst(str_replace('-', ' ', $status)) }}
-                                        </span>
+                                        @if ($contract->type === 'Employee')
+                                            <a href="{{ route('employeecontracts.edit', $contract->ID) }}"
+                                                class="btn btn-sm btn-outline-primary"
+                                                title="View Employee Contract Details">
+                                                View
+                                            </a>
+                                        @elseif ($contract->type === 'Purchase')
+                                            <a href="{{ route('purchasecontracts.edit', $contract->ID) }}"
+                                                class="btn btn-sm btn-outline-info" title="View Purchase Contract Details">
+                                                View
+                                            </a>
+                                        @endif
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="text-center text-muted p-4">
+                                    <td colspan="3" class="text-center text-muted p-4">
                                         No upcoming contract expirations in the next 4 months.
                                     </td>
                                 </tr>
