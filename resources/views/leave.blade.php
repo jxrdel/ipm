@@ -303,6 +303,15 @@
 @section('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+
+            var activelink = document.getElementById('leavelink');
+            var activeicon = document.getElementById('leaveicon');
+
+            // Set the fontWeight property to 'bold'
+            activelink.style.color = 'white';
+            activelink.style.fontWeight = 'bold';
+            activeicon.style.color = 'white';
+
             // Data from Controller
             const leaveEvents = {!! json_encode($calendarEvents) !!};
             const chartLabels = {{ Js::from($leaveTypeStats->keys()) }};

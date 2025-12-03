@@ -59,7 +59,7 @@
             <hr class="sidebar-divider my-0">
 
             <!-- Nav Item - Dashboard -->
-            <li class="nav-item active">
+            <li @class(['nav-item', 'active' => request()->routeIs('/')])>
                 <a class="nav-link" href="/">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span></a>
@@ -70,7 +70,7 @@
 
             <!-- Heading -->
             <div class="sidebar-heading">
-                Interface
+                Menu
             </div>
 
 
@@ -219,8 +219,11 @@
             @endauth
 
             <li class="nav-item">
-                <a class="nav-link" id="purchaselink" href="{{ route('leave.index') }}">
-                    <i id="purchaseicon" class="bi bi-newspaper"></i>
+                <a class="nav-link" id="leavelink" href="{{ route('leave.index') }}">
+                    <i id="leaveicon" class="bi bi-calendar-check" @class([
+                        'bi bi-calendar-check',
+                        'fw-bold text-white' => request()->routeIs('leave.*'),
+                    ])></i>
                     <span>Leave Management</span></a>
             </li>
 

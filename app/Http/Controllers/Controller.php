@@ -22,7 +22,7 @@ class Controller extends BaseController
 
         // Data for widgets
         $contractsEndingSoon = EmployeeContracts::where('EndDate', '>=', $today)->where('EndDate', '<=', $today->copy()->addMonths(4))->count()
-                             + PurchaseContracts::where('EndDate', '>=', '2025-12-03 00:00:00.000')->where('EndDate', '<=', $today->copy()->addMonths(4))->count();
+            + PurchaseContracts::where('EndDate', '>=', '2025-12-03 00:00:00.000')->where('EndDate', '<=', $today->copy()->addMonths(4))->count();
 
         $employeeContractsEndingThisYear = EmployeeContracts::whereYear('EndDate', $thisYear)->count();
         $purchaseContractsEndingThisYear = PurchaseContracts::whereYear('EndDate', $thisYear)->count();
@@ -70,18 +70,18 @@ class Controller extends BaseController
         }
 
         // Data for Table
-        $upcomingExpirationsTable = EmployeeContracts::with('internalcontact')
+        $upcomingExpirationsTable = EmployeeContracts::with('employee')
             ->where('EndDate', '>=', $today)
-            ->whereYear('EndDate', $thisYear)
+            ->where('EndDate', '<=', $today->copy()->addMonths(4))
             ->get()
             ->map(function ($contract) {
                 $contract->type = 'Employee';
                 return $contract;
             })
             ->concat(
-                PurchaseContracts::with('internalcontact')
+                PurchaseContracts::with('purchaseItem')
                     ->where('EndDate', '>=', $today)
-                    ->whereYear('EndDate', $thisYear)
+                    ->where('EndDate', '<=', $today->copy()->addMonths(4))
                     ->get()
                     ->map(function ($contract) {
                         $contract->type = 'Purchase';
@@ -102,7 +102,8 @@ class Controller extends BaseController
         ]);
     }
 
-    public function login(){
+    public function login()
+    {
         return view('login');
     }
 

@@ -30,6 +30,11 @@ class PurchaseContracts extends Model
         'InternalContactId',
     ];
 
+    public function purchaseItem()
+    {
+        return $this->belongsTo(Purchases::class, 'ExternalPurchaseId', 'ID');
+    }
+
     public function internalcontacts()
     {
         return $this->belongsToMany(InternalContacts::class, 'InternalContactPurchaseContracts', 'PurchaseContractId', 'InternalContactId');

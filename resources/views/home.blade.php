@@ -136,34 +136,17 @@
             <h1 class="page-title">Contracts Dashboard</h1>
             <p class="page-subtitle">Overview of employee and purchase contracts ending this year.</p>
         </div>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
-                <li class="breadcrumb-item active">Contracts</li>
-            </ol>
-        </nav>
     </div>
 
 
     <!-- Metric Widgets -->
     <div class="row g-4">
 
-        <!-- 4 Month Warning -->
+        <!-- Employee Contracts -->
         <div class="col-xl-4 col-md-6">
             <div class="card metric-card p-3 d-flex flex-row align-items-center justify-content-between">
                 <div>
-                    <div class="metric-label">Ending in 4 Months</div>
-                    <div class="metric-value">{{ $contractsEndingSoon }}</div>
-                </div>
-                <div class="icon-box bg-warning"><i class="bi bi-exclamation-triangle-fill"></i></div>
-            </div>
-        </div>
-
-        <!-- Employee Contracts -->
-        <div class="col-xl-2 col-md-6">
-            <div class="card metric-card p-3 d-flex flex-row align-items-center justify-content-between">
-                <div>
-                    <div class="metric-label">Employee</div>
+                    <div class="metric-label">Employee Contracts Ending {{ date('Y') }}</div>
                     <div class="metric-value">{{ $employeeContractsEndingThisYear }}</div>
                 </div>
                 <div class="icon-box bg-success"><i class="bi bi-person-fill"></i></div>
@@ -171,10 +154,10 @@
         </div>
 
         <!-- Purchase Contracts -->
-        <div class="col-xl-2 col-md-6">
+        <div class="col-xl-4 col-md-6">
             <div class="card metric-card p-3 d-flex flex-row align-items-center justify-content-between">
                 <div>
-                    <div class="metric-label">Purchase</div>
+                    <div class="metric-label">Purchase Contracts Ending {{ date('Y') }}</div>
                     <div class="metric-value">{{ $purchaseContractsEndingThisYear }}</div>
                 </div>
                 <div class="icon-box bg-primary"><i class="bi bi-briefcase-fill"></i></div>
@@ -226,7 +209,7 @@
         <div class="col-xl-5">
             <div class="card p-3">
                 <div class="card-header">
-                    <h6 class="fw-bold text-primary">Upcoming Expirations</h6>
+                    <h6 class="fw-bold text-primary">Upcoming Expirations (Ending in 4 Months)</h6>
                 </div>
 
                 <div class="table-responsive mt-2">
@@ -251,7 +234,7 @@
                                     <td>
                                         <strong>{{ $contract->Name }}</strong>
                                         <div class="small text-muted">
-                                            {{ $contract->type === 'Employee' ? $contract->internalcontact->FirstName . ' ' . $contract->internalcontact->LastName : '' }}
+                                            {{ $contract->type === 'Employee' ? $contract->employee->FirstName . ' ' . $contract->employee->LastName : '' }}
                                         </div>
                                     </td>
                                     <td>{{ $contract->type }}</td>
@@ -265,7 +248,7 @@
                             @empty
                                 <tr>
                                     <td colspan="4" class="text-center text-muted p-4">
-                                        No upcoming contract expirations this year.
+                                        No upcoming contract expirations in the next 4 months.
                                     </td>
                                 </tr>
                             @endforelse
