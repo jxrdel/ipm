@@ -27,7 +27,7 @@ class Controller extends BaseController
         $employeeContractsEndingThisYear = EmployeeContracts::whereYear('EndDate', $thisYear)->count();
         $purchaseContractsEndingThisYear = PurchaseContracts::whereYear('EndDate', $thisYear)->count();
 
-        $contractsExpiringThisMonth = EmployeeContracts::with('internalcontact')
+        $contractsExpiringThisMonth = EmployeeContracts::with('employee')
             ->whereYear('EndDate', $thisYear)
             ->whereMonth('EndDate', $today->month)
             ->get()
@@ -36,7 +36,7 @@ class Controller extends BaseController
                 return $contract;
             })
             ->concat(
-                PurchaseContracts::with('internalcontact')
+                PurchaseContracts::with('purchaseItem')
                     ->whereYear('EndDate', $thisYear)
                     ->whereMonth('EndDate', $today->month)
                     ->get()

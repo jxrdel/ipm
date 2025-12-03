@@ -93,6 +93,17 @@
             color: #28a745;
         }
 
+        .metric-label {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .icon-box {
+            flex-shrink: 0;
+            /* Prevents the icon from being squished */
+        }
+
         /* Table */
         .table thead {
             background: #f2f4f8;
@@ -139,132 +150,135 @@
     </div>
 
 
-    <!-- Metric Widgets -->
+    <!-- Main Content -->
     <div class="row g-4">
-
-        <!-- Employee Contracts -->
-        <div class="col-xl-4 col-md-6">
-            <div class="card metric-card p-3 d-flex flex-row align-items-center justify-content-between">
-                <div>
-                    <div class="metric-label">Employee Contracts Ending {{ date('Y') }}</div>
-                    <div class="metric-value">{{ $employeeContractsEndingThisYear }}</div>
-                </div>
-                <div class="icon-box bg-success"><i class="bi bi-person-fill"></i></div>
-            </div>
-        </div>
-
-        <!-- Purchase Contracts -->
-        <div class="col-xl-4 col-md-6">
-            <div class="card metric-card p-3 d-flex flex-row align-items-center justify-content-between">
-                <div>
-                    <div class="metric-label">Purchase Contracts Ending {{ date('Y') }}</div>
-                    <div class="metric-value">{{ $purchaseContractsEndingThisYear }}</div>
-                </div>
-                <div class="icon-box bg-primary"><i class="bi bi-briefcase-fill"></i></div>
-            </div>
-        </div>
-
-        <!-- Expiring This Month -->
-        <div class="col-xl-4 col-md-12">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h6 class="fw-bold text-danger">Expiring This Month</h6>
-                </div>
-                <div class="card-body">
-                    @forelse ($contractsExpiringThisMonth as $contract)
-                        <div class="d-flex justify-content-between mb-3 pb-2 border-bottom">
-                            <div>
-                                <div class="fw-bold text-dark">{{ $contract->Name }}</div>
-                                <div class="small text-muted">{{ $contract->type }}</div>
-                            </div>
-                            <span class="badge badge-danger-soft">
-                                {{ \Carbon\Carbon::parse($contract->EndDate)->format('M d') }}
-                            </span>
+        <!-- Left Column -->
+        <div class="col-lg-7">
+            <div class="row g-4">
+                <!-- Employee Contracts -->
+                <div class="col-md-6">
+                    <div class="card metric-card p-3">
+                        <div class="metric-label mb-2">Employee Contracts Ending {{ date('Y') }}</div>
+                        <div class="d-flex flex-row align-items-center justify-content-between">
+                            <div class="metric-value">{{ $employeeContractsEndingThisYear }}</div>
+                            <div class="icon-box bg-success"><i class="bi bi-person-fill"></i></div>
                         </div>
-                    @empty
-                        <p class="text-muted text-center">No contracts expiring this month.</p>
-                    @endforelse
+                    </div>
+                </div>
+
+                <!-- Purchase Contracts -->
+                <div class="col-md-6">
+                    <div class="card metric-card p-3">
+                        <div class="metric-label mb-2">Purchase Contracts Ending {{ date('Y') }}</div>
+                        <div class="d-flex flex-row align-items-center justify-content-between">
+                            <div class="metric-value">{{ $purchaseContractsEndingThisYear }}</div>
+                            <div class="icon-box bg-primary"><i class="bi bi-briefcase-fill"></i></div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Bar Chart -->
+                <div class="col-12">
+                    <div class="card p-3">
+                        <div class="card-header">
+                            <h6 class="fw-bold text-primary">Contract Expiry by Month ({{ date('Y') }})</h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="expiryBarChart" style="height: 300px;"></canvas>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-    </div>
-
-    <!-- Chart + Table -->
-    <div class="row g-4 mt-1">
-
-        <!-- Bar Chart -->
-        <div class="col-xl-7">
-            <div class="card p-3">
-                <div class="card-header">
-                    <h6 class="fw-bold text-primary">Contract Expiry by Month ({{ date('Y') }})</h6>
-                </div>
-                <div class="card-body">
-                    <canvas id="expiryBarChart" style="height: 300px;"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Upcoming Expirations Table -->
-        <div class="col-xl-5">
-            <div class="card p-3">
-                <div class="card-header">
-                    <h6 class="fw-bold text-primary">Upcoming Expirations (Ending in 4 Months)</h6>
-                </div>
-
-                <div class="table-responsive mt-2">
-                    <table class="table align-middle">
-                        <thead>
-                            <tr>
-                                <th>Contract</th>
-                                <th>Type</th>
-                                <th>End Date</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse ($upcomingExpirationsTable as $contract)
-                                @php
-                                    $endDate = \Carbon\Carbon::parse($contract->EndDate);
-                                @endphp
-                                <tr>
-                                    <td>
-                                        <strong>{{ $contract->Name }}</strong>
-                                        <div>
-                                            {{ $contract->type === 'Employee' ? $contract->employee->FirstName . ' ' . $contract->employee->LastName : '' }}
-                                        </div>
-                                    </td>
-                                    <td>{{ $contract->type }}</td>
-                                    <td>{{ $endDate->format('d M, Y') }}</td>
-                                    <td>
-                                        @if ($contract->type === 'Employee')
-                                            <a href="{{ route('employeecontracts.edit', $contract->ID) }}"
-                                                class="btn btn-sm btn-outline-primary"
-                                                title="View Employee Contract Details">
-                                                View
-                                            </a>
-                                        @elseif ($contract->type === 'Purchase')
-                                            <a href="{{ route('purchasecontracts.edit', $contract->ID) }}"
-                                                class="btn btn-sm btn-outline-info" title="View Purchase Contract Details">
-                                                View
-                                            </a>
-                                        @endif
-                                    </td>
-                                </tr>
+        <!-- Right Column -->
+        <div class="col-lg-5">
+            <div class="row g-4">
+                <!-- Expiring This Month -->
+                <div class="col-12">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h6 class="fw-bold text-danger">Expiring This Month</h6>
+                        </div>
+                        <div class="card-body">
+                            @forelse ($contractsExpiringThisMonth as $contract)
+                                <div class="d-flex justify-content-between mb-3 pb-2 border-bottom">
+                                    <div>
+                                        <div class="fw-bold text-dark">{{ $contract->Name }}</div>
+                                        <div class="small text-muted">{{ $contract->type }}</div>
+                                    </div>
+                                    <span class="badge badge-danger-soft">
+                                        {{ \Carbon\Carbon::parse($contract->EndDate)->format('M d') }}
+                                    </span>
+                                </div>
                             @empty
-                                <tr>
-                                    <td colspan="3" class="text-center text-muted p-4">
-                                        No upcoming contract expirations in the next 4 months.
-                                    </td>
-                                </tr>
+                                <p class="text-muted text-center">No contracts expiring this month.</p>
                             @endforelse
-                        </tbody>
-                    </table>
+                        </div>
+                    </div>
                 </div>
 
+                <!-- Upcoming Expirations Table -->
+                <div class="col-12">
+                    <div class="card p-3">
+                        <div class="card-header">
+                            <h6 class="fw-bold text-primary">Upcoming Expirations (Ending in 4 Months)</h6>
+                        </div>
+                        <div class="table-responsive mt-2">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Contract</th>
+                                        <th>Type</th>
+                                        <th>End Date</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse ($upcomingExpirationsTable as $contract)
+                                        @php
+                                            $endDate = \Carbon\Carbon::parse($contract->EndDate);
+                                        @endphp
+                                        <tr>
+                                            <td>
+                                                <div>
+                                                    {{ $contract->Name }}
+                                                    {{ $contract->type === 'Employee' ? $contract->employee->FirstName . ' ' . $contract->employee->LastName : '' }}
+                                                </div>
+                                            </td>
+                                            <td>{{ $contract->type }}</td>
+                                            <td>{{ $endDate->format('d M, Y') }}</td>
+                                            <td>
+                                                @if ($contract->type === 'Employee')
+                                                    <a href="{{ route('employeecontracts.edit', $contract->ID) }}"
+                                                        class="btn btn-sm btn-outline-primary"
+                                                        title="View Employee Contract Details">
+                                                        View
+                                                    </a>
+                                                @elseif ($contract->type === 'Purchase')
+                                                    <a href="{{ route('purchasecontracts.edit', $contract->ID) }}"
+                                                        class="btn btn-sm btn-outline-info"
+                                                        title="View Purchase Contract Details">
+                                                        View
+                                                    </a>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="3" class="text-center text-muted p-4">
+                                                No upcoming contract expirations in the next 4 months.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-
     </div>
 @endsection
 

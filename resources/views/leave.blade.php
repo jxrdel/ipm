@@ -171,6 +171,11 @@
             background-color: #858796;
             color: #fff;
         }
+
+        .page-title {
+            font-weight: 800;
+            color: #36454f;
+        }
     </style>
 @endsection
 
@@ -178,7 +183,7 @@
     <!-- Header -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <div>
-            <h1 class="h3 mb-1 text-gray-800">Leave Management Dashboard</h1>
+            <h1 class="page-title">Leave Management Dashboard</h1>
             <p class="mb-0 text-gray-600">View and manage employee leave across the department.</p>
         </div>
     </div>
