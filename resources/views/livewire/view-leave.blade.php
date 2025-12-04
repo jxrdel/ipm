@@ -23,8 +23,7 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="leave_type" class="form-label">Leave Type</label>
-                    <select wire:model.live="leave_type" id="leave_type" class="form-select"
-                        :disabled="!isEditing">
+                    <select wire:model.live="leave_type" id="leave_type" class="form-select" :disabled="!isEditing">
                         <option value="">Select a leave type</option>
                         @foreach ($leaveTypes as $value => $label)
                             <option value="{{ $value }}">{{ $label }}</option>
@@ -89,54 +88,9 @@
                 </div>
             </div>
 
-            @if (count($overlappingLeaves) > 0)
-                <div class="alert alert-warning mt-3">
-                    <strong>Warning:</strong> There are other employees from the same department on leave during this
-                    period:
-                    <ul>
-                        @foreach ($overlappingLeaves as $leave)
-                            <li>
-                                <strong>{{ $leave->internalContact->FirstName }}
-                                    {{ $leave->internalContact->LastName }}</strong>:
-                                {{ \Carbon\Carbon::parse($leave->start_date)->format('M d, Y') }} -
-                                {{ \Carbon\Carbon::parse($leave->end_date)->format('M d, Y') }}
-                                ({{ \App\Enums\LeaveTypeEnum::tryFrom($leave->leave_type)?->getLabel() ?? $leave->leave_type }})
-                            </li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
             <hr>
 
             <h5 class="mt-4">Attachments</h5>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>File Name</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($leave->uploads as $upload)
-                        <tr>
-                            <td>
-                                <a href="{{ asset('storage/' . $upload->file_path) }}"
-                                    target="_blank">{{ $upload->original_name }}</a>
-                            </td>
-                            <td class="text-end">
-                                <button type="button" class="btn btn-danger btn-sm"
-                                    wire:click="deleteUpload({{ $upload->id }})" wire:confirm="Are you sure you want to delete this file?"
-                                    :disabled="!isEditing">Delete</button>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="2">No attachments found.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
 
             <div x-show="isEditing">
                 <div class="row">
@@ -149,30 +103,43 @@
                         @error('uploads.*')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
-
-                        @if ($uploads)
-                            <div class="mt-3">
-                                <p>New Files:</p>
-                                <ul class="list-group">
-                                    @foreach ($uploads as $index => $upload)
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            {{ $upload->getClientOriginalName() }}
-                                            <button type="button" class="btn btn-danger btn-sm"
-                                                wire:click="removeNewUpload({{ $index }})">Remove</button>
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
                     </div>
                 </div>
             </div>
 
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>File Name</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($this->leave->uploads as $upload)
+                        <tr>
+                            <td>
+                                <a href="{{ asset('storage/' . $upload->file_path) }}"
+                                    target="_blank">{{ $upload->original_name }}</a>
+                            </td>
+                            <td class="text-end">
+                                <button type="button" class="btn btn-danger btn-sm"
+                                    wire:click="deleteUpload({{ $upload->id }})"
+                                    wire:confirm="Are you sure you want to delete this file?"
+                                    :disabled="!isEditing">Delete</button>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="2">No attachments found.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+
         </div>
         <div class="card-footer text-center" x-show="isEditing">
-            <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="update">
-                <span wire:loading.remove wire:target="update">Save Changes</span>
-                <span wire:loading wire:target="update">Saving...</span>
+            <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="update, uploads">
+                <span>Save</span>
                 <span wire:loading wire:target="update" class="spinner-border spinner-border-sm" role="status"
                     aria-hidden="true"></span>
             </button>

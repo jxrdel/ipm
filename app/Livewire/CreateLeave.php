@@ -100,7 +100,7 @@ class CreateLeave extends Component
         }
     }
 
-    public function removeUpload($index)
+    public function deleteUpload($index)
     {
         array_splice($this->uploads, $index, 1);
     }

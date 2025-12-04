@@ -92,7 +92,7 @@
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
                                         {{ $upload->getClientOriginalName() }}
                                         <button type="button" class="btn btn-danger btn-sm"
-                                            wire:click="removeUpload({{ $index }})">Remove</button>
+                                            wire:click="deleteUpload({{ $index }})">Delete</button>
                                     </li>
                                 @endforeach
                             </ul>
