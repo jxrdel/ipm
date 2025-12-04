@@ -24,4 +24,9 @@ class Leave extends Model
     {
         return $this->belongsTo(InternalContacts::class, 'internal_contact_id', 'ID');
     }
+
+    public function uploads()
+    {
+        return $this->hasMany(LeaveUpload::class);
+    }
 }

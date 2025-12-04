@@ -73,6 +73,34 @@
                 </div>
             </div>
 
+            <div class="row">
+                <div class="col-md-12 mb-3">
+                    <label for="uploads" class="form-label">Attachments</label>
+                    <input type="file" wire:model="uploads" id="uploads" class="form-control" multiple>
+
+                    <div wire:loading wire:target="uploads">Uploading...</div>
+
+                    @error('uploads.*')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
+
+                    @if ($uploads)
+                        <div class="mt-3">
+                            <p>Uploaded Files:</p>
+                            <ul class="list-group">
+                                @foreach ($uploads as $index => $upload)
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        {{ $upload->getClientOriginalName() }}
+                                        <button type="button" class="btn btn-danger btn-sm"
+                                            wire:click="removeUpload({{ $index }})">Remove</button>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
             @if (count($overlappingLeaves) > 0)
                 <div class="alert alert-warning mt-3">
                     <strong>Warning:</strong> There are other employees from the same department on leave during this
@@ -92,7 +120,11 @@
             @endif
         </div>
         <div class="card-footer text-center">
-            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="save, uploads">
+                <span>Save</span>
+                <span wire:loading wire:target="save" class="spinner-border spinner-border-sm" role="status"
+                    aria-hidden="true"></span>
+            </button>
         </div>
     </form>
 </div>

@@ -8,36 +8,44 @@ use App\Models\Leave;
 use App\Models\LeaveUpload;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
-class CreateLeave extends Component
+class ViewLeave extends Component
 {
     use WithFileUploads;
 
+    public Leave $leave;
+
     public $leave_type;
     public $start_date;
-    public
-
-        $end_date;
+    public $end_date;
     public $internal_contact_id;
     public $days_remaining;
-    public $days_to_be_taken = 0;
+    public $days_to_be_taken;
     public $uploads = [];
 
     public $leaveTypes = [];
     public $internalContacts = [];
+    public $overlappingLeaves = [];
 
-    #[Title('Create Leave')]
-
-    public function mount()
+    #[Title('View Leave')]
+    public function mount(Leave $leave)
     {
+        $this->leave = $leave;
+        $this->leave_type = $leave->leave_type;
+        $this->start_date = Carbon::parse($leave->start_date)->format('Y-m-d');
+        $this->end_date = Carbon::parse($leave->end_date)->format('Y-m-d');
+        $this->internal_contact_id = $leave->internal_contact_id;
+        $this->days_remaining = $leave->days_remaining;
+        $this->days_to_be_taken = $leave->days_to_be_taken;
+
         $this->leaveTypes = LeaveTypeEnum::getValues();
         $this->internalContacts = InternalContacts::orderBy('FirstName')->orderBy('LastName')->get();
+        $this->updateLeaveDetails();
     }
-
-    public $overlappingLeaves = [];
 
     public function updated($propertyName)
     {
@@ -60,10 +68,8 @@ class CreateLeave extends Component
             }
 
             if ($this->leave_type === LeaveTypeEnum::SICK_LEAVE->value) {
-                // Count all days for sick leave
                 $this->days_to_be_taken = $startDate->diffInDays($endDate) + 1;
             } else {
-                // Count only weekdays for other leave types
                 $period = CarbonPeriod::create($startDate, $endDate);
                 $days = 0;
                 foreach ($period as $date) {
@@ -74,16 +80,15 @@ class CreateLeave extends Component
                 $this->days_to_be_taken = $days;
             }
 
-            // Check for overlapping leaves
             if ($this->internal_contact_id && ($this->leave_type === LeaveTypeEnum::VACATION_LEAVE->value || $this->leave_type === LeaveTypeEnum::CASUAL_LEAVE->value)) {
                 $selectedContact = InternalContacts::find($this->internal_contact_id);
-
                 if ($selectedContact && $selectedContact->BusinessGroupId) {
                     $departmentId = $selectedContact->BusinessGroupId;
 
                     $this->overlappingLeaves = Leave::whereHas('internalContact', function ($query) use ($departmentId) {
                         $query->where('BusinessGroupId', $departmentId);
                     })
+                        ->where('id', '!=', $this->leave->id)
                         ->where(function ($query) use ($startDate, $endDate) {
                             $query->where(function ($q) use ($startDate, $endDate) {
                                 $q->where('start_date', '<=', $endDate)
@@ -100,12 +105,21 @@ class CreateLeave extends Component
         }
     }
 
-    public function removeUpload($index)
+    public function removeNewUpload($index)
     {
         array_splice($this->uploads, $index, 1);
     }
 
-    public function save()
+    public function deleteUpload($uploadId)
+    {
+        $upload = LeaveUpload::findOrFail($uploadId);
+        Storage::disk('public')->delete($upload->file_path);
+        $upload->delete();
+        $this->leave->refresh(); // Refresh the leave model to update uploads relationship
+        session()->flash('success', 'File deleted successfully.');
+    }
+
+    public function update()
     {
         $this->validate([
             'leave_type' => 'required|in:' . implode(',', array_keys(LeaveTypeEnum::getValues())),
@@ -117,7 +131,7 @@ class CreateLeave extends Component
             'uploads.*' => 'nullable|file|max:10240', // 10MB Max
         ]);
 
-        $leave = Leave::create([
+        $this->leave->update([
             'leave_type' => $this->leave_type,
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
@@ -129,19 +143,23 @@ class CreateLeave extends Component
         foreach ($this->uploads as $upload) {
             $path = $upload->store('leave-uploads', 'public');
             LeaveUpload::create([
-                'leave_id' => $leave->id,
+                'leave_id' => $this->leave->id,
                 'file_path' => $path,
                 'original_name' => $upload->getClientOriginalName(),
             ]);
         }
 
-        session()->flash('success', 'Leave record created successfully.');
+        $this->uploads = []; // Clear the new uploads array
+        $this->leave->refresh(); // Refresh the leave model to get the latest uploads
 
-        return redirect()->route('leave.index')->with('success', 'Leave record created successfully.');
+        session()->flash('success', 'Leave record updated successfully.');
+
+        // This is to make Alpine see the change and switch back to view mode.
+        $this->dispatch('leave-updated');
     }
 
     public function render()
     {
-        return view('livewire.create-leave');
+        return view('livewire.view-leave');
     }
 }

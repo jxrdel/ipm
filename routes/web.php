@@ -12,6 +12,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\UserController;
 use App\Livewire\CreateLeave;
+use App\Livewire\ViewLeave;
 use App\Livewire\CreateEmployeeContract;
 use App\Livewire\CreatePurchaseContract;
 use App\Livewire\CreatePurchaseContractModal;
@@ -76,6 +77,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/Leave', [LeaveController::class, 'index'])->name('leave.index');
     Route::get('/Leave/Create', CreateLeave::class)->name('leave.create');
+    Route::get('/Leave/{leave}/view', ViewLeave::class)->name('leave.view');
     Route::get('/getleaves', [LeaveController::class, 'getLeaves'])->name('getleaves');
     Route::get('/getupcomingleaves', [LeaveController::class, 'getUpcomingLeaves'])->name('getupcomingleaves');
     Route::get('/getongoingleaves', [LeaveController::class, 'getOngoingLeaves'])->name('getongoingleaves');
