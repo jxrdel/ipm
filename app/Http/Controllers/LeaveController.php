@@ -28,6 +28,10 @@ class LeaveController extends Controller
             ->where('end_date', '>=', $today)
             ->get();
 
+        foreach ($ongoingLeaves as $leave) {
+            $leave->days_remaining_from_today = $today->diffInDays(Carbon::parse($leave->end_date)) + 1;
+        }
+
         // Data for summary
         $totalApplicationsMonth = Leave::whereMonth('created_at', $today->month)
             ->whereYear('created_at', $today->year)

@@ -244,7 +244,10 @@
                         @forelse($ongoingLeaves as $leave)
                             <div class="leave-item">
                                 <span>{{ $leave->internalContact->FirstName }} {{ $leave->internalContact->LastName }}
-                                    <span class="badge bg-success small">Ongoing</span></span>
+                                    <span class="badge bg-success small">Ongoing
+                                        ({{ $leave->days_remaining_from_today }}
+                                        {{ Illuminate\Support\Str::plural('day', $leave->days_remaining_from_today) }}
+                                        left)</span></span>
                                 <span
                                     class="badge leave-{{ strtolower(str_replace(' ', '-', \App\Enums\LeaveTypeEnum::tryFrom($leave->leave_type)?->getLabel() ?? '')) }}">{{ \App\Enums\LeaveTypeEnum::tryFrom($leave->leave_type)?->getLabel() }}</span>
                             </div>
