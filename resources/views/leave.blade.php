@@ -344,6 +344,9 @@
                         html: true
                     });
                 },
+                eventClick: function(info) {
+                    window.location.href = "{{ route('leave.view', ['leave' => ':id']) }}".replace(':id', info.event.id);
+                },
                 height: 650,
                 contentHeight: 600,
             });

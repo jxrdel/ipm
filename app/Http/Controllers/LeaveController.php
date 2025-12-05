@@ -14,7 +14,7 @@ class LeaveController extends Controller
     public function index()
     {
         $today = Carbon::today();
-        
+
         // Data for widgets
         $upcomingLeaves = Leave::with('internalContact')
             ->where('start_date', '>', $today)
@@ -39,13 +39,14 @@ class LeaveController extends Controller
             ->groupBy('leave_type')
             ->orderByDesc('count')
             ->first();
-        
+
         // Data for Calendar
         $allLeaves = Leave::with('internalContact')->get();
         $calendarEvents = $allLeaves->map(function ($leave) {
             $leaveTypeLabel = LeaveTypeEnum::tryFrom($leave->leave_type)?->getLabel() ?? 'Unknown';
             $className = 'leave-' . strtolower(str_replace(' ', '-', $leaveTypeLabel));
             return [
+                'id' => $leave->id,
                 'title' => $leave->internalContact->FirstName . ' ' . $leave->internalContact->LastName,
                 'start' => $leave->start_date,
                 'end' => Carbon::parse($leave->end_date)->addDay()->toDateString(), // FullCalendar's end date is exclusive
@@ -62,7 +63,7 @@ class LeaveController extends Controller
             ->groupBy('leave_type')
             ->get()
             ->mapWithKeys(function ($item) {
-                 return [LeaveTypeEnum::tryFrom($item->leave_type)?->getLabel() ?? $item->leave_type => $item->total_days];
+                return [LeaveTypeEnum::tryFrom($item->leave_type)?->getLabel() ?? $item->leave_type => $item->total_days];
             });
 
         return view('leave', [
@@ -106,16 +107,16 @@ class LeaveController extends Controller
             ->addColumn('leave_type_label', function (Leave $leave) {
                 return LeaveTypeEnum::tryFrom($leave->leave_type)?->getLabel() ?? $leave->leave_type;
             })
-            ->filterColumn('leave_type_label', function($query, $keyword) {
+            ->filterColumn('leave_type_label', function ($query, $keyword) {
                 $query->where('leave_type', 'like', "%{$keyword}%");
             })
             ->addColumn('internal_contact_name', function (Leave $leave) {
                 return $leave->internalContact->FirstName . ' ' . $leave->internalContact->LastName;
             })
-            ->filterColumn('internal_contact_name', function($query, $keyword) {
+            ->filterColumn('internal_contact_name', function ($query, $keyword) {
                 $query->whereHas('internalContact', function ($q) use ($keyword) {
                     $q->where('FirstName', 'like', "%{$keyword}%")
-                      ->orWhere('LastName', 'like', "%{$keyword}%");
+                        ->orWhere('LastName', 'like', "%{$keyword}%");
                 });
             })
             ->editColumn('start_date', function (Leave $leave) {
