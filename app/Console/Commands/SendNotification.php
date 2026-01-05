@@ -56,7 +56,6 @@ class SendNotification extends Command
                 'stephan.myers@health.gov.tt',
                 'stephon.stewart@health.gov.tt',
                 'charles.glasgow@health.gov.tt',
-                'frances.browne@health.gov.tt',
                 'donald.bain@health.gov.tt',
                 'jardel.regis@health.gov.tt',
             ];

@@ -1,7 +1,7 @@
 @extends('layout')
 
 @section('title')
-    <title>IPM | Contracts Dashboard</title>
+    <title>ICT Contracts | Dashboard</title>
 @endsection
 
 @section('styles')

@@ -10,7 +10,7 @@
     <meta name="author" content="">
     <link rel="icon" type="image/x-icon" href="{{ asset('TTCOA.ico') }}">
 
-    <title>IPM | Login</title>
+    <title>ICT Contracts | Login</title>
 
     <!-- Custom fonts for this template-->
     <link href="{{ asset('js/vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet" type="text/css">
@@ -39,9 +39,10 @@
                             <div class="col">
                                 <div class="p-5">
                                     <div class="text-center">
-                                        <h1 class="h4 text-gray-900 mb-4"><i class="fas fa-file-contract fa-lg"> &nbsp;</i>IPM Login</h1>
+                                        <h1 class="h4 text-gray-900 mb-4"><i class="fas fa-file-contract fa-lg">
+                                                &nbsp;</i>ICT Contracts Login</h1>
                                     </div>
-                                        @livewire('login-form')
+                                    @livewire('login-form')
                                 </div>
                             </div>
                         </div>
@@ -54,15 +55,15 @@
 
     </div>
 
-<!-- Bootstrap core JavaScript-->
-<script src="{{ asset('js/vendor/jquery/jquery.min.js') }}"></script>
-<script src="{{ asset('js/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <!-- Bootstrap core JavaScript-->
+    <script src="{{ asset('js/vendor/jquery/jquery.min.js') }}"></script>
+    <script src="{{ asset('js/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 
-<!-- Core plugin JavaScript-->
-<script src="{{ asset('js/vendor/jquery-easing/jquery.easing.min.js') }}"></script>
+    <!-- Core plugin JavaScript-->
+    <script src="{{ asset('js/vendor/jquery-easing/jquery.easing.min.js') }}"></script>
 
-<!-- Custom scripts for all pages-->
-<script src="{{ asset('js/sb-admin-2.min.js') }}"></script>
+    <!-- Custom scripts for all pages-->
+    <script src="{{ asset('js/sb-admin-2.min.js') }}"></script>
 
 </body>
 

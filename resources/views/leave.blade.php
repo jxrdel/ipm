@@ -1,7 +1,7 @@
 @extends('layout')
 
 @section('title')
-    <title>IPM | Leave Dashboard</title>
+    <title>ICT Contracts | Leave Dashboard</title>
 @endsection
 
 @section('styles')
@@ -247,7 +247,8 @@
                                     <span class="badge bg-success small">Ongoing
                                         ({{ $leave->days_remaining_from_today }}
                                         {{ Illuminate\Support\Str::plural('day', $leave->days_remaining_from_today) }}
-                                        left)</span></span>
+                                        left)
+                                    </span></span>
                                 <span
                                     class="badge leave-{{ strtolower(str_replace(' ', '-', \App\Enums\LeaveTypeEnum::tryFrom($leave->leave_type)?->getLabel() ?? '')) }}">{{ \App\Enums\LeaveTypeEnum::tryFrom($leave->leave_type)?->getLabel() }}</span>
                             </div>
@@ -348,7 +349,8 @@
                     });
                 },
                 eventClick: function(info) {
-                    window.location.href = "{{ route('leave.view', ['leave' => ':id']) }}".replace(':id', info.event.id);
+                    window.location.href = "{{ route('leave.view', ['leave' => ':id']) }}".replace(
+                        ':id', info.event.id);
                 },
                 height: 650,
                 contentHeight: 600,

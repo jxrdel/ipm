@@ -57,7 +57,7 @@
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="days_to_be_taken" class="form-label">Days To Be Taken</label>
+                    <label for="days_to_be_taken" class="form-label">Days Applied For</label>
                     <input type="number" wire:model="days_to_be_taken" id="days_to_be_taken" class="form-control">
                     @error('days_to_be_taken')
                         <span class="text-danger">{{ $message }}</span>

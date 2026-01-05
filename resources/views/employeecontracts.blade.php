@@ -2,7 +2,7 @@
 
 @section('title')
     <meta name="csrf-token" content="{{ csrf_token() }}" />
-    <title>IPM | Employee Contracts</title>
+    <title>ICT Contracts | Employee Contracts</title>
 @endsection
 
 @section('styles')

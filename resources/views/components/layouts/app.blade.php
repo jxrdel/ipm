@@ -52,7 +52,7 @@
                 <div class="sidebar-brand-icon">
                     <i class="fas fa-file-contract fa-lg"></i>
                 </div>
-                <div class="sidebar-brand-text mx-3">IPM</div>
+                <div class="sidebar-brand-text mx-3">ICT Contracts</div>
             </a>
 
             <!-- Divider -->
