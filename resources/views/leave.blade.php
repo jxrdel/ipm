@@ -206,7 +206,8 @@
                     <div class="icon-circle bg-primary text-white"><i class="bi bi-calendar-event fs-5"></i></div>
                     <div class="flex-grow-1">
                         <div class="text-xs text-primary">Upcoming Leave (Next 30 Days)</div>
-                        <div class="h5 mb-0">{{ $upcomingLeaves->count() }} Employees</div>
+                        {{-- Get count of unique InternalContacts --}}
+                        <div class="h5 mb-0">{{ $upcomingLeaves->unique('internalContact_id')->count() }} Employee(s)</div>
                     </div>
                 </div>
                 <div class="card-footer py-2 px-3">
@@ -266,16 +267,11 @@
                 <div class="card-body widget-card">
                     <div class="icon-circle bg-info text-white"><i class="bi bi-pie-chart-fill fs-5"></i></div>
                     <div class="flex-grow-1">
-                        <div class="text-xs text-info">Leave Summary (This Month)</div>
+                        <div class="text-xs text-info">Leave Summary (Next 30 Days)</div>
                         <div class="h5 mb-0">{{ $totalApplicationsMonth }} Applications</div>
                     </div>
                 </div>
                 <div class="card-footer d-flex align-items-center justify-content-around text-center">
-                    <div>
-                        <div class="small text-muted">Total On Leave</div>
-                        <div class="fw-bold">{{ $ongoingLeaves->count() }}</div>
-                    </div>
-                    <div class="vr"></div>
                     <div>
                         <div class="small text-muted">Most Common</div>
                         <div class="fw-bold">

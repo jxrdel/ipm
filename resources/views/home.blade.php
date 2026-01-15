@@ -205,7 +205,7 @@
                             @forelse ($contractsExpiringThisMonth as $contract)
                                 <div class="d-flex justify-content-between mb-3 pb-2 border-bottom">
                                     <div>
-                                        <div class="fw-bold text-dark">{{ $contract->Name }}</div>
+                                        <div class="fw-bold text-dark"> {{ $contract->type === 'Employee' ? $contract->employee->FirstName . ' ' . $contract->employee->LastName : $contract->Name }} </div>
                                         <div class="small text-muted">{{ $contract->type }}</div>
                                     </div>
                                     <span class="badge badge-danger-soft">
