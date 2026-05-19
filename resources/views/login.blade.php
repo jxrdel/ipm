@@ -40,7 +40,7 @@
                                 <div class="p-5">
                                     <div class="text-center">
                                         <h1 class="h4 text-gray-900 mb-4"><i class="fas fa-file-contract fa-lg">
-                                                &nbsp;</i>ICT Contracts Login</h1>
+                                                &nbsp;</i>ICT Contracts</h1>
                                     </div>
                                     @livewire('login-form')
                                 </div>

@@ -207,7 +207,7 @@
                     <div class="flex-grow-1">
                         <div class="text-xs text-primary">Upcoming Leave (Next 30 Days)</div>
                         {{-- Get count of unique InternalContacts --}}
-                        <div class="h5 mb-0">{{ $upcomingLeaves->unique('internalContact_id')->count() }} Employee(s)</div>
+                        <div class="h5 mb-0">{{ $upcomingLeaves->count() }} Employee(s)</div>
                     </div>
                 </div>
                 <div class="card-footer py-2 px-3">
