@@ -68,7 +68,15 @@ class ViewPurchaseContractModal extends Component
         $externalcontacts = DB::table('ExternalContactPurchaseContracts')
             ->where('PurchaseContractId', $id)
             ->join('ExternalContactPersons', 'ExternalContactPurchaseContracts.ExternalContactPersonId', '=', 'ExternalContactPersons.ID')
-            ->select('ExternalContactPurchaseContracts.*', 'ExternalContactPersons.FirstName', 'ExternalContactPersons.LastName')
+            ->select(
+                'ExternalContactPurchaseContracts.*',
+                'ExternalContactPersons.FirstName',
+                'ExternalContactPersons.LastName',
+                'ExternalContactPersons.Email',
+                'ExternalContactPersons.AddressLine1',
+                'ExternalContactPersons.AddressLine2',
+                'ExternalContactPersons.Phone1'
+            )
             ->get();
 
         $this->externalcontacts = $externalcontacts;

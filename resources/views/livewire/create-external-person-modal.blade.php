@@ -80,6 +80,11 @@
                 </div>
 
                 @livewire('associated-company')
+                @error('selectedCompanies')
+                    <div class="text-danger mt-2 text-center fw-bold">
+                        {{ $message }}
+                    </div>
+                @enderror
             </div>
             <div class="modal-footer" style="align-items: center">
                 <div style="margin:auto">

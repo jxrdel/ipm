@@ -331,8 +331,8 @@
 
             $('#notifiedUsersSelect').select2();
             $('#notifiedUsersSelect').val(@json($this->usernotifications)).trigger('change');
-            $wire.set('editedNU', []); // Initiates value to an empty array
-            $wire.set('isEditedNU', false); // Set the flag to false
+            $wire.set('editedUN', []); // Initiates value to an empty array
+            $wire.set('isEditedUN', false); // Set the flag to false
 
             $('#notifiedUsersSelect').on('change', function() {
                 var selectedValues = $(this).val(); // Get selected values as an array

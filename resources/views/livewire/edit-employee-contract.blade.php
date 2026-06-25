@@ -2,7 +2,7 @@
     <div class="card-body">
         <form wire:submit.prevent="editEC" action="">
             <div class="modal-body" style="color: black">
-        
+
                 <div class="d-sm-flex align-items-center justify-content-between mb-4">
                     <a href="{{route('employeecontracts')}}" class="btn btn-dark">
                         <i class="bi bi-arrow-left"></i> Back
@@ -11,26 +11,26 @@
                         <strong style="margin-right: 90px"> &nbsp; Edit Employee Contract</strong>
                     </h1>
                 </div>
-                
+
                 <div class="row">
                     <hr class="border border-secondary border-3 opacity-35" style="margin-top:15px">
                     <div  style="display: flex">
                         <div class="col-5">
                             <label style="margin-top: 5px" for="title">Select Departments To Restrict Contract Record to: &nbsp;</label>
                         </div>
-                        
+
                         <div class="col" wire:ignore>
                             <select id="contractdepartments" multiple style="margin-left:50px;width:100%">
                                 @foreach ($departments as $department)
                                     <option value="{{ $department->ID }}">{{ $department->Name }} </option>
                                 @endforeach
-                
+
                             </select>
                         </div>
                     </div>
                     <br>
                 </div>
-                
+
                 <div class="row mt-4">
 
                     <div class="col" style="display: flex">
@@ -40,25 +40,25 @@
                             @foreach ($employees as $employee)
                                 <option value="{{ $employee->ID }}">{{ $employee->FirstName}} {{ $employee->LastName}}</option>
                             @endforeach
-            
+
                         </select>
                     </div>
-                    
+
                     <div class="col" style="display: flex">
                         <label style="margin-top: 5px" for="title">Role: &nbsp;</label>
-                        
+
                         <select wire:model="role" class="form-select" style="margin-left:80px;display: inline;width: 70%; height: 35px" required>
                             <option value=""></option>
                             @foreach ($roles as $role)
                                 <option value="{{ $role->ID }}">{{ $role->Name }} </option>
                             @endforeach
-            
+
                         </select>
                     </div>
 
 
                 </div>
-                
+
                 <div class="row" style="margin-top: 10px">
 
                     <div class="col" style="display: flex">
@@ -72,7 +72,7 @@
                     </div>
                 </div>
 
-                
+
                 <div class="row" style="margin-top: 10px">
 
                     <div class="col" style="display: flex">
@@ -85,35 +85,35 @@
                         <input class="form-control" wire:model="onlinelocation" type="text" style="width: 70%;color:black">
                     </div>
                 </div>
-                
+
                 <div class="row" style="margin-top: 10px">
 
                     <div class="col" style="display: flex">
                         <label style="margin-top: 5px" for="title">Manager: &nbsp;</label>
-                        
+
                         <select wire:model="manager" class="form-select" style="margin-left:50px;display: inline;width: 76%; height: 35px" required>
                             <option value=""></option>
                             @foreach ($managers as $manager)
                                 <option value="{{ $manager->ID }}">{{ $manager->FirstName}} {{ $manager->LastName}}</option>
                             @endforeach
-            
+
                         </select>
 
                     </div>
 
                     <div class="col" style="display: flex">
                         <label style="margin-top: 5px" for="title">Department: &nbsp;</label>
-                        
+
                         <select wire:model="department" class="form-select" style="margin-left:25px;display: inline;width: 70%; height: 35px" required>
                             <option value=""></option>
                             @foreach ($departments as $department)
                                 <option value="{{ $department->ID }}">{{ $department->Name }} </option>
                             @endforeach
-            
+
                         </select>
                     </div>
                 </div>
-                
+
                 <div class="row" style="margin-top: 10px">
 
                     <div class="col" style="display: flex">
@@ -126,16 +126,16 @@
                         <input wire:ignore class="form-control" wire:model="enddate" id="enddate" type="date" style="margin-left:3rem;width: 60%;color:black">
                     </div>
                 </div>
-                
+
 
                 <hr class="border border-secondary border-3 opacity-35" style="margin-top:15px">
                 <p class="text-center fw-bold fs-5">Notifications</p>
-                
+
                 <div wire:ignore class="row" style="margin-top: 10px">
                     <div class="col-2">
                         <label style="margin-top: 5px" for="title">Notified Users: &nbsp;</label>
                     </div>
-                    
+
                     <div class="col">
                         <select style="width: 100%" id="notifiedUsersSelect" class="js-example-basic-multiple" multiple="multiple">
                             <option value="">Select an Internal Contacts</option>
@@ -145,16 +145,16 @@
                         </select>
                     </div>
                 </div>
-                
+
                 <div class="row" style="margin-top: 30px">
                     <div class="col" style="text-align: center;padding-bottom:10px">
-                    
+
                             <label for="title">Add Notification &nbsp;</label>
                             <input wire:model="notidate" type="date" class="form-control" style="display: inline;width: 400px">
                             <button wire:click.prevent="addNotification()" class="btn btn-primary" style="width: 12rem"><i class="fas fa-plus"></i> Add Notification</button>
                     </div>
                 </div>
-    
+
                 <div class="row">
                     <table id="notiTable" class="table table-hover table-bordered"  style="width: 100%; margin:auto">
                         <thead>
@@ -169,7 +169,7 @@
                                     <td>{{ \Carbon\Carbon::parse($notification['DisplayDate'])->format('F jS, Y') }}</td>
                                     <td style="text-align: center"><button wire:click="removeNotification({{$index}})" type="button" class="btn btn-outline-danger"><i class="bi bi-trash"></i></button></td>
                                 </tr>
-                                
+
                             @empty
                                 <tr>
                                     <td colspan="2" style="text-align: center">No Notifications</td>
@@ -181,10 +181,10 @@
 
                 <hr class="border border-secondary border-3 opacity-35" style="margin-top:35px">
                 <p class="text-center fw-bold fs-5">File Uploads</p>
-            
+
                 <div class="row">
                     <div class="col" style="text-align: center;padding-bottom:10px">
-                    
+
                             <label for="title">Upload Docuements &nbsp;</label>
                             <input wire:model="uploadInput" type="file" class="form-control" style="display: inline;width: 400px">
                             <button wire:click.prevent="uploadFiles()" class="btn btn-primary" wire:loading.attr="disabled" style="width: 8rem"><i class="fas fa-plus"></i> Upload</button>
@@ -230,23 +230,23 @@
 @script
 <script>
     $(document).ready(function() {
-        
+
         $('#contractdepartments').select2();
         $('#contractdepartments').val(@json($this->associateddepartments)).trigger('change');
         $wire.set('editedDepts', []); // Initiates value to an empty array
         $wire.set('isEditedDepts', false); // Set the flag to false
-        
+
         $('#contractdepartments').on('change', function() {
             var selectedValues = $(this).val(); // Get selected values as an array
             $wire.set('editedDepts', selectedValues); // Pass selected values to Livewire
             $wire.set('isEditedDepts', true); // Set the flag to true
         });
-        
+
         $('#notifiedUsersSelect').select2();
         $('#notifiedUsersSelect').val(@json($this->usernotifications)).trigger('change');
-        $wire.set('editedNU', []); // Initiates value to an empty array
-        $wire.set('isEditedNU', false); // Set the flag to false
-        
+        $wire.set('editedUN', []); // Initiates value to an empty array
+        $wire.set('isEditedUN', false); // Set the flag to false
+
         $('#notifiedUsersSelect').on('change', function() {
             var selectedValues = $(this).val(); // Get selected values as an array
             $wire.set('editedUN', selectedValues); // Pass selected values to Livewire

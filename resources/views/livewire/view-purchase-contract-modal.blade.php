@@ -78,7 +78,11 @@
                         <label> <strong>External Contacts:</strong> 
                             @if ($this->externalcontacts)
                                 @foreach ($this->externalcontacts as $index => $contact)
-                                    • {{$contact->FirstName}} {{$contact->LastName}}
+                                    <span data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="top" 
+                                          data-bs-title="<strong>Name:</strong> {{ $contact->FirstName }} {{ $contact->LastName }}<br><strong>Email:</strong> {{ $contact->Email ?? 'N/A' }}<br><strong>Address:</strong> {{ trim(($contact->AddressLine1 ?? '') . ' ' . ($contact->AddressLine2 ?? '')) ?: 'N/A' }}<br><strong>Phone:</strong> {{ $contact->Phone1 ?? 'N/A' }}" 
+                                          style="cursor: help; text-decoration: underline dotted; margin-right: 10px;">
+                                        • {{$contact->FirstName}} {{$contact->LastName}}
+                                    </span>
                                 @endforeach
                             @endif
                         </label>
@@ -121,3 +125,26 @@
       </div>
     </div>
   </div>
+
+@script
+<script>
+    $(document).ready(function() {
+        $('#viewPCModal').on('shown.bs.modal', function () {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('#viewPCModal [data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                var t = bootstrap.Tooltip.getInstance(tooltipTriggerEl);
+                if (t) { t.dispose(); }
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+
+        $('#viewPCModal').on('hidden.bs.modal', function () {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('#viewPCModal [data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+                var t = bootstrap.Tooltip.getInstance(tooltipTriggerEl);
+                if (t) { t.dispose(); }
+            });
+        });
+    });
+</script>
+@endscript
