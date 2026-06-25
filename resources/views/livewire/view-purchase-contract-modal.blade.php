@@ -78,9 +78,9 @@
                         <label> <strong>External Contacts:</strong> 
                             @if ($this->externalcontacts)
                                 @foreach ($this->externalcontacts as $index => $contact)
-                                    <span data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="top" 
-                                          data-bs-title="<strong>Name:</strong> {{ $contact->FirstName }} {{ $contact->LastName }}<br><strong>Email:</strong> {{ $contact->Email ?? 'N/A' }}<br><strong>Address:</strong> {{ trim(($contact->AddressLine1 ?? '') . ' ' . ($contact->AddressLine2 ?? '')) ?: 'N/A' }}<br><strong>Phone:</strong> {{ $contact->Phone1 ?? 'N/A' }}" 
-                                          style="cursor: help; text-decoration: underline dotted; margin-right: 10px;">
+                                    <span data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="top" data-bs-custom-class="custom-tooltip"
+                                          data-bs-title="<strong>Name:</strong> {{ $contact->FirstName }} {{ $contact->LastName }}<br><strong>Email:</strong> {{ $contact->Email ?? 'N/A' }}<br><strong>Phone:</strong> {{ $contact->Phone1 ?? 'N/A' }}" 
+                                          style="color: #0d6efd; cursor: pointer; text-decoration: underline; margin-right: 10px;">
                                         • {{$contact->FirstName}} {{$contact->LastName}}
                                     </span>
                                 @endforeach

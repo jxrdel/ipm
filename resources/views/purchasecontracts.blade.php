@@ -10,6 +10,14 @@
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/gh/habibmhamadi/multi-select-tag@2.0.1/dist/css/multi-select-tag.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        .custom-tooltip .tooltip-inner {
+            max-width: 350px !important;
+            text-align: left !important;
+            padding: 10px 15px !important;
+            font-size: 14px !important;
+        }
+    </style>
 @endsection
 
 @section('content')
